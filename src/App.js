@@ -17,12 +17,12 @@ function App() {
     formData.append('audio', file);
 
     try {
-      const res = await axios.post('http://localhost:7000/api/v1/audio/upload', formData, {
+      const uploadResponse = await axios.post('http://localhost:7000/api/v1/audio/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      const conversationId = res.data.conversationId;
+      const conversationId = uploadResponse.data.conversationId;
       console.log('Conversation ID:', conversationId);
 
       const fileAnalysisResponse = await axios.post('http://localhost:7000/api/v1/audio/messages', {
@@ -46,7 +46,12 @@ function App() {
       {response && (
         <div>
           <h2>Response:</h2>
-          <pre>{JSON.stringify(response, null, 2)}</pre>
+          {response.transcript && (
+            <div>
+              <h3>Transcript:</h3>
+              <pre>{JSON.stringify(response.transcript, null, 2)}</pre>
+            </div>
+          )}
           {response.analytics && (
             <div>
               <h3>Analytics:</h3>
