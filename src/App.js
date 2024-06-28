@@ -113,6 +113,7 @@ function App() {
         conversationId
       });
 
+      console.log('File Analysis Response:', fileAnalysisResponse.data); // Log the response
       setResponse(fileAnalysisResponse.data);
     } catch (err) {
       console.error('Upload error:', err);
@@ -128,19 +129,40 @@ function App() {
         <button type="submit">Upload</button>
       </form>
       {response && (
-        <div>
-          <h2>Response:</h2>
-          {response.transcript && (
-            <div>
-              <h3>Transcript:</h3>
-              <pre>{JSON.stringify(response.transcript, null, 2)}</pre>
+        <div className="container">
+          {response.transcript && response.transcript.messages ? (
+            <div className="card transcription">
+              <h2>Transcript:</h2>
+              {response.transcript.messages.map((message) => (
+                <div key={message.id}>
+                  <p><strong>Duration</strong> {message.duration}</p>
+                  <p><strong>Text:</strong> {message.text}</p>
+                  <p><strong>Sentiment:</strong> {message.sentiment.suggested}</p>
+                  <hr />
+                </div>
+              ))}
             </div>
+          ) : (
+            <p>No transcript available</p>
           )}
-          {response.analytics && (
-            <div>
-              <h3>Analytics:</h3>
-              <pre>{JSON.stringify(response.analytics, null, 2)}</pre>
+          {response.analytics ? (
+            <div className="card analytics">
+              <h2>Analytics:</h2>
+              <div className="analytics-item">
+                <h3>Talk vs Silence</h3>
+                <span>{response.analytics.metrics.find(m => m.type === 'total_talk_time').percent}% Talk</span>
+              </div>
+              <div className="analytics-item">
+                <h3>Speech Speed</h3>
+                <span>{response.analytics.members[0].pace.wpm} words/min</span>
+              </div>
+              <div className="analytics-item">
+                <h3>Longest Monologue</h3>
+                <span>{response.analytics.members[0].talkTime.seconds} seconds</span>
+              </div>
             </div>
+          ) : (
+            <p>No analytics available</p>
           )}
         </div>
       )}
