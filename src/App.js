@@ -4,7 +4,9 @@ import './App.css';
 
 function App() {
   const [file, setFile] = useState(null);
-  const [response, setResponse] = useState(null);
+  const [audioResponse, setAudioResponse] = useState(null);
+  const [videoResponse, setVideoResponse] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -94,30 +96,57 @@ function App() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setError(null);
+    setAudioResponse(null);
+    setVideoResponse(null);
 
     try {
       const audioBlob = await extractAudioFromVideo(file);
 
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'audio.wav');
+      const audioFormData = new FormData();
+      audioFormData.append('audio', audioBlob, 'audio.wav');
 
-      const uploadResponse = await axios.post('http://localhost:7000/api/v1/audio/upload', formData, {
+      const videoFormData = new FormData();
+      videoFormData.append('video', file);
+
+      axios.post('http://localhost:7000/api/v1/audio/upload', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      });
-      const conversationId = uploadResponse.data.conversationId;
-      console.log('Conversation ID:', conversationId);
+      }).then(audioUploadResponse => {
+        console.log('Audio Upload Response:', audioUploadResponse.data);
+        const conversationId = audioUploadResponse.data.conversationId;
+        console.log('Conversation ID:', conversationId);
 
-      const fileAnalysisResponse = await axios.post('http://localhost:7000/api/v1/audio/messages', {
-        conversationId
+        axios.post('http://localhost:7000/api/v1/audio/messages', { conversationId })
+          .then(fileAnalysisResponse => {
+            console.log('File Analysis Response:', fileAnalysisResponse.data);
+            setAudioResponse(fileAnalysisResponse.data);
+          })
+          .catch(err => {
+            console.error('File analysis error:', err);
+            setError('Error analyzing audio file');
+          });
+      }).catch(err => {
+        console.error('Audio upload error:', err);
+        setError('Error uploading audio file');
       });
 
-      console.log('File Analysis Response:', fileAnalysisResponse.data); // Log the response
-      setResponse(fileAnalysisResponse.data);
+      axios.post('http://localhost:7000/api/v1/video/upload', videoFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(videoUploadResponse => {
+        console.log('Video Upload Response:', videoUploadResponse.data);
+        setVideoResponse(videoUploadResponse.data);
+      }).catch(err => {
+        console.error('Video upload error:', err);
+        setError('Error uploading video file');
+      });
+
     } catch (err) {
       console.error('Upload error:', err);
-      setResponse({ error: err.response ? err.response.data : 'Error uploading file' });
+      setError('Error processing file');
     }
   };
 
@@ -128,44 +157,45 @@ function App() {
         <input type="file" accept="video/*" onChange={handleFileChange} />
         <button type="submit">Upload</button>
       </form>
-      {response && (
-        <div className="container">
-          {response.transcript && response.transcript.messages ? (
-            <div className="card transcription">
-              <h2>Transcript:</h2>
-              {response.transcript.messages.map((message) => (
-                <div key={message.id}>
-                  <p><strong>Duration</strong> {message.duration}</p>
-                  <p><strong>Text:</strong> {message.text}</p>
-                  <p><strong>Sentiment:</strong> {message.sentiment.suggested}</p>
-                  <hr />
-                </div>
-              ))}
+      {error && <p className="error">{error}</p>}
+      <div className="container">
+        {videoResponse && (
+          <div className="card description">
+            <h2>Generated Description:</h2>
+            <p>{videoResponse.description}</p>
+          </div>
+        )}
+        {audioResponse && audioResponse.transcript && (
+          <div className="card transcription">
+            <h2>Transcript:</h2>
+            {audioResponse.transcript.messages.map((message, index) => (
+              <div key={index}>
+                <p><strong>Duration:</strong> {message.duration}</p>
+                <p><strong>Text:</strong> {message.text}</p>
+                <p><strong>Sentiment:</strong> {message.sentiment.suggested}</p>
+                <hr />
+              </div>
+            ))}
+          </div>
+        )}
+        {audioResponse && audioResponse.analytics && (
+          <div className="card analytics">
+            <h2>Analytics:</h2>
+            <div className="analytics-item">
+              <h3>Talk vs Silence</h3>
+              <span>{audioResponse.analytics.metrics.find(m => m.type === 'total_talk_time').percent}% Talk</span>
             </div>
-          ) : (
-            <p>No transcript available</p>
-          )}
-          {response.analytics ? (
-            <div className="card analytics">
-              <h2>Analytics:</h2>
-              <div className="analytics-item">
-                <h3>Talk vs Silence</h3>
-                <span>{response.analytics.metrics.find(m => m.type === 'total_talk_time').percent}% Talk</span>
-              </div>
-              <div className="analytics-item">
-                <h3>Speech Speed</h3>
-                <span>{response.analytics.members[0].pace.wpm} words/min</span>
-              </div>
-              <div className="analytics-item">
-                <h3>Longest Monologue</h3>
-                <span>{response.analytics.members[0].talkTime.seconds} seconds</span>
-              </div>
+            <div className="analytics-item">
+              <h3>Speech Speed</h3>
+              <span>{audioResponse.analytics.members[0].pace.wpm} words/min</span>
             </div>
-          ) : (
-            <p>No analytics available</p>
-          )}
-        </div>
-      )}
+            <div className="analytics-item">
+              <h3>Longest Monologue</h3>
+              <span>{audioResponse.analytics.members[0].talkTime.seconds} seconds</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
