@@ -7,6 +7,7 @@ function App() {
   const [audioResponse, setAudioResponse] = useState(null);
   const [videoResponse, setVideoResponse] = useState(null);
   const [error, setError] = useState(null);
+  const [language, setLanguage] = useState('en'); // State to manage the language
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -105,9 +106,12 @@ function App() {
 
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
+      audioFormData.append('language', language);
 
       const videoFormData = new FormData();
       videoFormData.append('video', file);
+      videoFormData.append('language', language); // Send language preference
+
 
       axios.post('http://localhost:7000/api/v1/audio/upload', audioFormData, {
         headers: {
@@ -150,24 +154,59 @@ function App() {
     }
   };
 
+  const handleLanguageChange = () => {
+    setLanguage(language === 'en' ? 'ru' : 'en');
+  };
+
+  const getTranslation = (text) => {
+    const translations = {
+      en: {
+        title: "Video Upload",
+        uploadButton: "Upload",
+        bodyLanguageAnalysis: "Body Language Analysis:",
+        transcript: "Transcript:",
+        analytics: "Analytics:",
+        talkVsSilence: "Talk vs Silence",
+        speechSpeed: "Speech Speed",
+        longestMonologue: "Longest Monologue",
+        error: "Error processing file"
+      },
+      ru: {
+        title: "Загрузка видео",
+        uploadButton: "Загрузить",
+        bodyLanguageAnalysis: "Анализ языка тела:",
+        transcript: "Транскрипт:",
+        analytics: "Аналитика:",
+        talkVsSilence: "Разговор против тишины",
+        speechSpeed: "Скорость речи",
+        longestMonologue: "Самый длинный монолог",
+        error: "Ошибка обработки файла"
+      }
+    };
+    return translations[language][text];
+  };
+
   return (
     <div className="App">
-      <h1>Video Upload</h1>
+      <button onClick={handleLanguageChange}>
+        {language === 'en' ? 'Switch to Russian' : 'Switch to English'}
+      </button>
+      <h1>{getTranslation('title')}</h1>
       <form onSubmit={handleSubmit}>
         <input type="file" accept="video/*" onChange={handleFileChange} />
-        <button type="submit">Upload</button>
+        <button type="submit">{getTranslation('uploadButton')}</button>
       </form>
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error">{getTranslation('error')}</p>}
       <div className="container">
         {videoResponse && (
           <div className="card description">
-            <h2>Generated Description:</h2>
-            <p>{videoResponse.description}</p>
+            <h2>{getTranslation('bodyLanguageAnalysis')}</h2>
+            <div dangerouslySetInnerHTML={{ __html: videoResponse.description.replace(/\n/g, '<br>') }} />
           </div>
         )}
         {audioResponse && audioResponse.transcript && (
           <div className="card transcription">
-            <h2>Transcript:</h2>
+            <h2>{getTranslation('transcript')}</h2>
             {audioResponse.transcript.messages.map((message, index) => (
               <div key={index}>
                 <p><strong>Duration:</strong> {message.duration}</p>
@@ -180,17 +219,17 @@ function App() {
         )}
         {audioResponse && audioResponse.analytics && (
           <div className="card analytics">
-            <h2>Analytics:</h2>
+            <h2>{getTranslation('analytics')}</h2>
             <div className="analytics-item">
-              <h3>Talk vs Silence</h3>
+              <h3>{getTranslation('talkVsSilence')}</h3>
               <span>{audioResponse.analytics.metrics.find(m => m.type === 'total_talk_time').percent}% Talk</span>
             </div>
             <div className="analytics-item">
-              <h3>Speech Speed</h3>
+              <h3>{getTranslation('speechSpeed')}</h3>
               <span>{audioResponse.analytics.members[0].pace.wpm} words/min</span>
             </div>
             <div className="analytics-item">
-              <h3>Longest Monologue</h3>
+              <h3>{getTranslation('longestMonologue')}</h3>
               <span>{audioResponse.analytics.members[0].talkTime.seconds} seconds</span>
             </div>
           </div>
