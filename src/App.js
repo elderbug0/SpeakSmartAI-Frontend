@@ -126,14 +126,14 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      axios.post('http://localhost:7000/api/v1/audio/upload', audioFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/upload', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       }).then(audioUploadResponse => {
         const conversationId = audioUploadResponse.data.conversationId;
 
-        axios.post('http://localhost:7000/api/v1/audio/messages', { conversationId })
+        axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/messages', { conversationId })
           .then(fileAnalysisResponse => {
             setAudioResponse(fileAnalysisResponse.data);
           })
@@ -144,7 +144,7 @@ function App() {
         setError('Error uploading audio file');
       });
 
-      axios.post('http://localhost:7000/api/v1/video/upload', videoFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
