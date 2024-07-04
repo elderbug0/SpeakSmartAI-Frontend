@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.App {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+.upload-form {
+  margin: 20px 0;
+}
+
+.upload-box {
+  border: 2px dashed #ccc;
+  padding: 40px;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  width: 300px;
+  margin-bottom: 10px;
+}
+
+.upload-box input[type="file"] {
+  display: none;
+}
+
+.upload-label {
+  display: block;
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 50px;
+}
+
+.upload-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.upload-button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: red;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin: 10px;
+  width: 300px;
+  text-align: left;
+}
+
+.analytics-item {
+  margin-bottom: 10px;
+}
+
+.analytics-item h3 {
+  margin: 0;
+}
