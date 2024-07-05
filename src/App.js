@@ -11,7 +11,7 @@ function App() {
   const [videoResponse, setVideoResponse] = useState(null);
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState('en');
-  const [loading, setLoading] = useState(false); // New loading state
+  const [loadingStage, setLoadingStage] = useState(null); // New loading stage state
   const dropRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -115,7 +115,7 @@ function App() {
     setError(null);
     setAudioResponse(null);
     setVideoResponse(null);
-    setLoading(true); // Set loading to true when form is submitted
+    setLoadingStage('uploading'); // Set initial loading stage
 
     try {
       const audioBlob = await extractAudioFromVideo(file);
@@ -134,19 +134,20 @@ function App() {
         }
       }).then(audioUploadResponse => {
         const conversationId = audioUploadResponse.data.conversationId;
+        setLoadingStage('processingAudio'); // Update loading stage
 
         axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/messages', { conversationId })
           .then(fileAnalysisResponse => {
             setAudioResponse(fileAnalysisResponse.data);
-            setLoading(false); // Set loading to false when audio response is ready
+            setLoadingStage(null); // Reset loading stage when audio response is ready
           })
           .catch(err => {
             setError('Error analyzing audio file');
-            setLoading(false); // Set loading to false if there is an error
+            setLoadingStage(null); // Reset loading stage if there is an error
           });
       }).catch(err => {
         setError('Error uploading audio file');
-        setLoading(false); // Set loading to false if there is an error
+        setLoadingStage(null); // Reset loading stage if there is an error
       });
 
       axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
@@ -155,15 +156,15 @@ function App() {
         }
       }).then(videoUploadResponse => {
         setVideoResponse(videoUploadResponse.data);
-        setLoading(false); // Set loading to false when video response is ready
+        setLoadingStage('processingVideo'); // Update loading stage
       }).catch(err => {
         setError('Error uploading video file');
-        setLoading(false); // Set loading to false if there is an error
+        setLoadingStage(null); // Reset loading stage if there is an error
       });
 
     } catch (err) {
       setError('Error processing file');
-      setLoading(false); // Set loading to false if there is an error
+      setLoadingStage(null); // Reset loading stage if there is an error
     }
   };
 
@@ -182,7 +183,10 @@ function App() {
         talkVsSilence: "Talk vs Silence",
         speechSpeed: "Speech Speed",
         longestMonologue: "Longest Monologue",
-        error: "Error processing file"
+        error: "Error processing file",
+        uploading: "Uploading files...",
+        processingAudio: "Processing audio...",
+        processingVideo: "Processing video..."
       },
       ru: {
         title: "Загрузка видео",
@@ -193,7 +197,10 @@ function App() {
         talkVsSilence: "Разговор против тишины",
         speechSpeed: "Скорость речи",
         longestMonologue: "Самый длинный монолог",
-        error: "Ошибка обработки файла"
+        error: "Ошибка обработки файла",
+        uploading: "Загрузка файлов...",
+        processingAudio: "Обработка аудио...",
+        processingVideo: "Обработка видео..."
       }
     };
     return translations[language][text];
@@ -239,8 +246,9 @@ function App() {
               <Button type="submit" className="w-full">{getTranslation('uploadButton')}</Button>
             </div>
           </form>
-          {loading && (
+          {loadingStage && (
             <div className="flex justify-center">
+              <p>{getTranslation(loadingStage)}</p>
               <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
