@@ -7,6 +7,18 @@
   text-align: center;
   padding: 20px;
 }
+/* Add this to your existing index.css or a global CSS file */
+html, body {
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Roboto', sans-serif; /* Ensure you have a consistent font */
+}
+
+#root {
+  min-height: 100%;
+}
 
 .upload-form {
   margin: 20px 0;
@@ -72,3 +84,17 @@
 .analytics-item h3 {
   margin: 0;
 }
+/* Add this to your tailwind.css or main CSS file */
+.text-wrap {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+/* In your styles/tailwind.css or a separate CSS file */
+.pre-wrap {
+  white-space: pre-wrap; /* Wrap text */
+  word-wrap: break-word; /* Break long words */
+  max-height: 400px; /* Adjust as needed */
+  overflow-y: auto; /* Add vertical scroll if content overflows */
+}
+
