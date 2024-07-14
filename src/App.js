@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/Card';
 import './styles/tailwind.css';
+import ResultsPage from './ResultsPage';
 
 function App() {
   const [file, setFile] = useState(null);
@@ -14,6 +16,7 @@ function App() {
   const [loadingStage, setLoadingStage] = useState(null);
   const [gptResponse, setGptResponse] = useState(null);
   const dropRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -113,7 +116,7 @@ function App() {
 
   const pollAudioProcessingStatus = async (publicId) => {
     try {
-      const response = await axios.get(`http://localhost:7000/api/v1/audio/status/${publicId}`);
+      const response = await axios.get(`https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/status/${publicId}`);
       if (response.data.status === 'processing') {
         setTimeout(() => pollAudioProcessingStatus(publicId), 3000); // poll every 3 seconds
       } else {
@@ -129,7 +132,7 @@ function App() {
 
   const analyzeTextWithGpt = async (text) => {
     try {
-      const response = await axios.post('http://localhost:7000/api/v1/audio/analyze-text', { text });
+      const response = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/analyze-text', { text });
       setGptResponse(response.data);
     } catch (error) {
       setError('Error analyzing text with GPT-3');
@@ -156,7 +159,7 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      axios.post('http://localhost:7000/api/v1/audio/uploadd', audioFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -169,7 +172,7 @@ function App() {
         setAudioProcessing(false);
       });
 
-      axios.post('http://localhost:7000/api/v1/video/upload', videoFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -244,6 +247,10 @@ function App() {
     return translations[language][text];
   };
 
+  const handleSeeResults = () => {
+    navigate('/results', { state: { audioResponse, videoResponse, gptResponse } });
+  };
+
   return (
     <div className="w-full min-h-screen bg-gray-100">
       <div className="w-full max-w-4xl mx-auto py-12 md:py-16">
@@ -297,27 +304,8 @@ function App() {
             </div>
           )}
           {error && <p className="text-red-500">{getTranslation('error')}</p>}
-          {!audioProcessing && audioResponse && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold text-gray-800">Audio Analysis Result:</h3>
-              <pre className="bg-gray-100 p-4 rounded text-gray-800 pre-wrap">{audioResponse.results.amazon.text}</pre>
-              {gptResponse && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{getTranslation('gptAnalysis')}</h3>
-                  <pre className="bg-gray-100 p-4 rounded text-gray-800 pre-wrap">{gptResponse}</pre>
-                </div>
-              )}
-            </div>
-          )}
-          {videoResponse && (
-            <Card className="description">
-              <CardHeader>
-                <CardTitle className="text-gray-800">{getTranslation('bodyLanguageAnalysis')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-gray-800" dangerouslySetInnerHTML={{ __html: videoResponse.description.replace(/\n/g, '<br>') }} />
-              </CardContent>
-            </Card>
+          {(!audioProcessing && audioResponse && videoResponse) && (
+            <Button onClick={handleSeeResults} className="w-full bg-blue-500 text-white rounded py-2 hover:bg-blue-600 mt-4">See Results</Button>
           )}
         </main>
         <section className="mt-12">
@@ -363,4 +351,15 @@ function UploadIcon(props) {
   );
 }
 
-export default App;
+function AppWrapper() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/results" element={<ResultsPage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default AppWrapper;
