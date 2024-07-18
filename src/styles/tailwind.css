@@ -2,18 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-.App {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 20px;
-}
-/* Add this to your existing index.css or a global CSS file */
 html, body {
-  background-color: #f8f9fa;
+  background-color: #F1F1F1;
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Roboto', sans-serif; /* Ensure you have a consistent font */
+  font-family: 'Roboto', sans-serif;
+  width: 100%;
 }
 
 #root {
@@ -26,11 +21,11 @@ html, body {
 
 .upload-box {
   border: 2px dashed #ccc;
-  padding: 40px;
+  padding: 20px;
   position: relative;
   cursor: pointer;
   display: inline-block;
-  width: 300px;
+  width: 100%; /* Updated for responsiveness */
   margin-bottom: 10px;
 }
 
@@ -43,12 +38,8 @@ html, body {
   text-align: center;
 }
 
-.upload-icon {
-  font-size: 50px;
-}
-
 .upload-button {
-  background-color: #007bff;
+  background-color: #5C8490;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -56,7 +47,7 @@ html, body {
 }
 
 .upload-button:hover {
-  background-color: #0056b3;
+  background-color: #486b70;
 }
 
 .error {
@@ -73,7 +64,8 @@ html, body {
   border: 1px solid #ccc;
   padding: 20px;
   margin: 10px;
-  width: 300px;
+  width: 100%; /* Updated for responsiveness */
+  max-width: 300px; /* Updated for responsiveness */
   text-align: left;
 }
 
@@ -84,17 +76,55 @@ html, body {
 .analytics-item h3 {
   margin: 0;
 }
-/* Add this to your tailwind.css or main CSS file */
+
 .text-wrap {
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
 }
-/* In your styles/tailwind.css or a separate CSS file */
+
 .pre-wrap {
-  white-space: pre-wrap; /* Wrap text */
-  word-wrap: break-word; /* Break long words */
-  max-height: 400px; /* Adjust as needed */
-  overflow-y: auto; /* Add vertical scroll if content overflows */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.blurred-image {
+  position: absolute;
+  top: 50%; /* Adjust as needed */
+  left: 50%; /* Adjust as needed */
+  transform: translate(-50%, -50%);
+  filter: blur(10px); /* Adjust the blur intensity as needed */
+  opacity: 0.5; /* Optional: Adjust the opacity for a subtle effect */
+  z-index: -1; /* Ensure it stays behind other content */
+}
+/* tailwind.css */
+.result-block {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
 }
 
+.result-block .summary {
+  font-weight: bold;
+  color: #333;
+}
+
+.result-block .details {
+  margin-top: 8px;
+  background: #f9f9f9;
+  padding: 8px;
+  border-radius: 4px;
+  overflow: auto;
+}
+
+.results-page {
+  padding: 16px;
+}
+
+.results-grid {
+  display: grid;
+  gap: 16px;
+}

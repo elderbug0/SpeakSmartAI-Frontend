@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import Header from './components/Header'; // Make sure the path is correct
+import './styles/tailwind.css';
 
 const AnalysisBlock = ({ title, score, content }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -92,27 +94,66 @@ const ResultsPage = () => {
     );
   };
 
+  const renderBodyLanguageAnalysis = (videoData) => {
+    if (!videoData) return null;
+
+    const parsedData = JSON.parse(videoData);
+
+    return (
+      <div className="mt-4">
+        {Object.keys(parsedData.details).map((key) => (
+          <AnalysisBlock
+            key={key}
+            title={key.replace(/([A-Z])/g, ' $1').trim()} // Format the key to be more readable
+            score={parsedData.summary[key]}
+            content={
+              <div>
+                {Object.keys(parsedData.details[key]).map((detailKey) => (
+                  <div key={detailKey} className="mb-2">
+                    <p className="font-semibold">{detailKey.replace(/([A-Z])/g, ' $1').trim()}</p>
+                    {typeof parsedData.details[key][detailKey] === 'object' ? (
+                      <div className="ml-4">
+                        {Object.keys(parsedData.details[key][detailKey]).map((subKey) => (
+                          <p key={subKey}>{`${subKey.replace(/([A-Z])/g, ' $1').trim()}: ${parsedData.details[key][detailKey][subKey]}`}</p>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="ml-4">{parsedData.details[key][detailKey]}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            }
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
-    <div className="w-full min-h-screen bg-gray-100 p-6">
-      <h1 className="text-2xl font-bold text-gray-800">Results</h1>
-      {audioResponse && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold text-gray-800">Audio Analysis Result:</h3>
-          <pre className="bg-gray-100 p-4 rounded text-gray-800 pre-wrap">{audioResponse.results.amazon.text}</pre>
-          {gptResponse && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold text-gray-800">GPT Analysis</h3>
-              {renderGptAnalysis(gptResponse)}
-            </div>
-          )}
-        </div>
-      )}
-      {videoResponse && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold text-gray-800">Body Language Analysis:</h3>
-          <div className="text-gray-800" dangerouslySetInnerHTML={{ __html: videoResponse.description.replace(/\n/g, '<br>') }} />
-        </div>
-      )}
+    <div className="w-full min-h-screen bg-gray-100">
+      <Header />
+      <div className="mx-auto py-16 px-4 mt-16">
+        <h1 className="text-2xl font-bold text-gray-800">Results</h1>
+        {audioResponse && (
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold text-gray-800">Audio Analysis Result:</h3>
+            <pre className="bg-gray-100 p-4 rounded text-gray-800 pre-wrap">{audioResponse.results.amazon.text}</pre>
+            {gptResponse && (
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold text-gray-800">GPT Analysis</h3>
+                {renderGptAnalysis(gptResponse)}
+              </div>
+            )}
+          </div>
+        )}
+        {videoResponse && (
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold text-gray-800">Body Language Analysis:</h3>
+            {renderBodyLanguageAnalysis(videoResponse.description)}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

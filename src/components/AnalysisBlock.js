@@ -1,6 +1,7 @@
+// components/AnalysisBlock.jsx
 import React, { useState } from 'react';
 
-const AnalysisBlock = ({ title, score, children }) => {
+const AnalysisBlock = ({ title, score, content }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleOpen = () => {
@@ -8,16 +9,12 @@ const AnalysisBlock = ({ title, score, children }) => {
   };
 
   return (
-    <div className="border rounded-lg p-4 mb-4">
+    <div className="bg-white rounded shadow p-4 my-4">
       <div className="flex justify-between items-center cursor-pointer" onClick={toggleOpen}>
-        <h4 className="text-lg font-semibold">{title}</h4>
-        <span className="text-gray-600">{score}</span>
+        <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+        <span className="text-sm text-gray-500">Score: {score}</span>
       </div>
-      {isOpen && (
-        <div className="mt-2">
-          {children}
-        </div>
-      )}
+      {isOpen && <div className="mt-2 text-gray-600 whitespace-pre-wrap">{content}</div>}
     </div>
   );
 };
