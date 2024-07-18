@@ -5,6 +5,7 @@ import { FaUpload, FaChartLine, FaComment } from 'react-icons/fa';
 import { Button } from './components/ui/Button';
 import './styles/tailwind.css';
 import ResultsPage from './ResultsPage';
+import { Platform } from 'react-native'; // Add this import for Platform
 
 function App() {
   const [file, setFile] = useState(null);
@@ -19,13 +20,28 @@ function App() {
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      setFile({
+        uri: URL.createObjectURL(selectedFile),
+        type: selectedFile.type,
+        name: selectedFile.name,
+        rawFile: selectedFile
+      });
+    }
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files[0];
-    setFile(droppedFile);
+    if (droppedFile) {
+      setFile({
+        uri: URL.createObjectURL(droppedFile),
+        type: droppedFile.type,
+        name: droppedFile.name,
+        rawFile: droppedFile
+      });
+    }
   };
 
   const handleDragOver = (event) => {
@@ -69,7 +85,7 @@ function App() {
         reject(err);
       };
 
-      reader.readAsArrayBuffer(file);
+      reader.readAsArrayBuffer(file.rawFile);
     });
   };
 
@@ -163,17 +179,17 @@ function App() {
     setAudioProcessing(true);
 
     try {
-      const audioBlob = await extractAudioFromVideo(file);
+      const audioBlob = await extractAudioFromVideo(file.rawFile);
 
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
       audioFormData.append('language', language); // Pass the selected language
 
       const videoFormData = new FormData();
-      videoFormData.append('video', file);
+      videoFormData.append('video', file.rawFile);
       videoFormData.append('language', language); // Pass the selected language
 
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/upload', audioFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -187,7 +203,13 @@ function App() {
         setAudioProcessing(false);
       });
 
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
+      const videoUri = Platform.OS === 'android' ? file.uri : file.uri.replace('file://', '');
+
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', {
+        uri: videoUri,
+        type: file.type,
+        name: file.name
+      }, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
