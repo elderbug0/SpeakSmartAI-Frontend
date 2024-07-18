@@ -163,7 +163,7 @@ function App() {
     setAudioProcessing(true);
 
     try {
-      const audioBlob = 21;
+      const audioBlob = await extractAudioFromVideo(file);
 
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
