@@ -35,7 +35,16 @@ function App() {
   const extractAudioFromVideo = async (file) => {
     return new Promise((resolve, reject) => {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioContext) {
+        reject(new Error('AudioContext is not supported by your browser.'));
+        return;
+      }
+
       const reader = new FileReader();
+      if (!reader) {
+        reject(new Error('FileReader is not supported by your browser.'));
+        return;
+      }
 
       reader.onload = function () {
         const arrayBuffer = reader.result;
@@ -54,9 +63,21 @@ function App() {
           offlineAudioContext.startRendering().then((renderedBuffer) => {
             const wavBlob = audioBufferToWav(renderedBuffer);
             resolve(wavBlob);
-          }).catch(reject);
-        }).catch(reject);
+          }).catch((err) => {
+            console.error('Error rendering offline audio context:', err);
+            reject(new Error('Error rendering offline audio context.'));
+          });
+        }).catch((err) => {
+          console.error('Error decoding audio data:', err);
+          reject(new Error('Error decoding audio data.'));
+        });
       };
+
+      reader.onerror = function (err) {
+        console.error('Error reading file:', err);
+        reject(new Error('Error reading file.'));
+      };
+
       reader.readAsArrayBuffer(file);
     });
   };
@@ -125,6 +146,7 @@ function App() {
         analyzeTextWithGpt(response.data.results.amazon.text);
       }
     } catch (error) {
+      console.error('Error polling audio processing status:', error);
       setError('Error polling audio processing status');
       setAudioProcessing(false);
     }
@@ -134,8 +156,8 @@ function App() {
     try {
       const response = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/analyze-text', { text });
       setGptResponse(response.data);
-    
     } catch (error) {
+      console.error('Error analyzing text with GPT-3:', error);
       setError('Error analyzing text with GPT-3');
     }
   };
@@ -148,18 +170,18 @@ function App() {
     setGptResponse(null);
     setLoadingStage('uploading');
     setAudioProcessing(true);
-  
+
     try {
       const audioBlob = await extractAudioFromVideo(file);
-  
+
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
       audioFormData.append('language', language); // Pass the selected language
-  
+
       const videoFormData = new FormData();
       videoFormData.append('video', file);
       videoFormData.append('language', language); // Pass the selected language
-  
+
       axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/upload', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -173,7 +195,7 @@ function App() {
         setLoadingStage(null);
         setAudioProcessing(false);
       });
-  
+
       axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -186,7 +208,7 @@ function App() {
         setError('Error uploading video file');
         setLoadingStage(null);
       });
-  
+
     } catch (err) {
       console.error('Error processing file:', err);
       setError('Error processing file');
@@ -194,7 +216,7 @@ function App() {
       setAudioProcessing(false);
     }
   };
-  
+
   const handleLanguageChange = (event) => {
     setLanguage(event.target.value);
   };
@@ -276,34 +298,33 @@ function App() {
           )}
         </div>
         <div>
-  <h2 className="text-center mt-24 text-2xl font-bold" style={{ color: '#3F3F3F', fontSize: '30px', marginBottom: '50px' }}>How does it work?</h2>
-</div>
-<section className="w-full flex justify-center">
-  <div className="grid grid-cols-1 md:grid-cols-3 w-3/5 gap-10">
-    <div className="flex items-start text-left md:text-left w-full max-w-xs mb-4 md:mb-0">
-      <FaUpload className="w-16 h-16 mr-4 text-blue-500" />
-      <div>
-        <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Upload Your Video</h3>
-        <p style={{ color: '#747474', fontSize: '18px' }}>Record your speech on any topic and upload it to our platform.</p>
-      </div>
-    </div>
-    <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
-      <FaChartLine className="w-16 h-16 mr-4 text-blue-500" />
-      <div>
-        <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>AI Analysis</h3>
-        <p style={{ color: '#747474', fontSize: '18px' }}>Our AI analyzes your video to evaluate your speech and body language.</p>
-      </div>
-    </div>
-    <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
-      <FaComment className="w-16 h-16 mr-4 text-blue-500" />
-      <div>
-        <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Get Feedback</h3>
-        <p style={{ color: '#747474', fontSize: '18px' }}>Receive detailed feedback and tips to improve your performance.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
+          <h2 className="text-center mt-24 text-2xl font-bold" style={{ color: '#3F3F3F', fontSize: '30px', marginBottom: '50px' }}>How does it work?</h2>
+        </div>
+        <section className="w-full flex justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 w-3/5 gap-10">
+            <div className="flex items-start text-left md:text-left w-full max-w-xs mb-4 md:mb-0">
+              <FaUpload className="w-16 h-16 mr-4 text-blue-500" />
+              <div>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Upload Your Video</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>Record your speech on any topic and upload it to our platform.</p>
+              </div>
+            </div>
+            <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
+              <FaChartLine className="w-16 h-16 mr-4 text-blue-500" />
+              <div>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>AI Analysis</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>Our AI analyzes your video to evaluate your speech and body language.</p>
+              </div>
+            </div>
+            <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
+              <FaComment className="w-16 h-16 mr-4 text-blue-500" />
+              <div>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Get Feedback</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>Receive detailed feedback and tips to improve your performance.</p>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
