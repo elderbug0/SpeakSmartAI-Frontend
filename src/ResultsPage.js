@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import Header from './components/Header'; // Make sure the path is correct
+import Header from './components/Header';
 import './styles/tailwind.css';
 
 const AnalysisBlock = ({ title, score, content }) => {
@@ -11,7 +11,7 @@ const AnalysisBlock = ({ title, score, content }) => {
   };
 
   return (
-    <div className="bg-white rounded shadow p-4 my-4">
+    <div className="bg-white rounded-3xl shadow p-4 my-4">
       <div className="flex justify-between items-center cursor-pointer" onClick={toggleOpen}>
         <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
         <span className="text-sm text-gray-500">Score: {score}</span>
@@ -104,7 +104,7 @@ const ResultsPage = () => {
         {Object.keys(parsedData.details).map((key) => (
           <AnalysisBlock
             key={key}
-            title={key.replace(/([A-Z])/g, ' $1').trim()} // Format the key to be more readable
+            title={key.replace(/([A-Z])/g, ' $1').trim()}
             score={parsedData.summary[key]}
             content={
               <div>
@@ -133,26 +133,36 @@ const ResultsPage = () => {
   return (
     <div className="w-full min-h-screen bg-gray-100">
       <Header />
-      <div className="mx-auto py-16 px-4 mt-16">
-        <h1 className="text-2xl font-bold text-gray-800">Results</h1>
-        {audioResponse && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold text-gray-800">Audio Analysis Result:</h3>
-            <pre className="bg-gray-100 p-4 rounded text-gray-800 pre-wrap">{audioResponse.results.amazon.text}</pre>
-            {gptResponse && (
-              <div className="mt-4">
-                <h3 className="text-lg font-semibold text-gray-800">GPT Analysis</h3>
-                {renderGptAnalysis(gptResponse)}
-              </div>
-            )}
-          </div>
-        )}
-        {videoResponse && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold text-gray-800">Body Language Analysis:</h3>
-            {renderBodyLanguageAnalysis(videoResponse.description)}
-          </div>
-        )}
+      <div className="mx-auto py-16 px-4 mt-16 max-w-7xl">
+        <div className="text-center mb-8">
+          <h2 className="text-4xl font-bold leading-tight" style={{ color: '#3F3F3F', marginBottom: '20px' }}>
+            Analysis Results
+          </h2>
+          <p className="text-lg font-thin" style={{ color: '#747474' }}>
+            Detailed feedback on your speech and body language
+          </p>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 shadow-lg w-full">
+          {audioResponse && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold text-gray-800">Audio Analysis Result:</h3>
+              <pre className="bg-gray-100 p-4 rounded text-gray-800 pre-wrap">{audioResponse.results.amazon.text}</pre>
+              {gptResponse && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold text-gray-800">GPT Analysis</h3>
+                  {renderGptAnalysis(gptResponse)}
+                </div>
+              )}
+            </div>
+          )}
+          {videoResponse && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold text-gray-800">Body Language Analysis:</h3>
+              {renderBodyLanguageAnalysis(videoResponse.description)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

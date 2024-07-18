@@ -116,7 +116,7 @@ function App() {
 
   const pollAudioProcessingStatus = async (publicId) => {
     try {
-      const response = await axios.get(`http://localhost:7000/api/v1/audio/status/${publicId}`);
+      const response = await axios.get(`https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/status/${publicId}`);
       if (response.data.status === 'processing') {
         setTimeout(() => pollAudioProcessingStatus(publicId), 3000); // poll every 3 seconds
       } else {
@@ -132,7 +132,7 @@ function App() {
 
   const analyzeTextWithGpt = async (text) => {
     try {
-      const response = await axios.post('http://localhost:7000/api/v1/audio/analyze-text', { text });
+      const response = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/analyze-text', { text });
       setGptResponse(response.data);
     
     } catch (error) {
@@ -160,7 +160,7 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      axios.post('http://localhost:7000/api/v1/audio/uploadd', audioFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -173,7 +173,7 @@ function App() {
         setAudioProcessing(false);
       });
 
-      axios.post('http://localhost:7000/api/v1/video/upload', videoFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
