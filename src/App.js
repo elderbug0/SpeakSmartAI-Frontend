@@ -160,7 +160,7 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language); // Pass the selected language
   
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/upload', audioFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
