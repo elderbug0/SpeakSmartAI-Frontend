@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaUpload, FaChartLine, FaComment } from 'react-icons/fa';
-import { useDropzone } from 'react-dropzone';
 import { Button } from './components/ui/Button';
 import './styles/tailwind.css';
 import ResultsPage from './ResultsPage';
@@ -16,16 +15,22 @@ function App() {
   const [language, setLanguage] = useState('en');
   const [loadingStage, setLoadingStage] = useState(null);
   const [gptResponse, setGptResponse] = useState(null);
+  const dropRef = useRef(null);
   const navigate = useNavigate();
 
-  const onDrop = (acceptedFiles) => {
-    setFile(acceptedFiles[0]);
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
   };
 
-  const { getInputProps, getRootProps, open } = useDropzone({ 
-    noClick: true, 
-    onDrop 
-  });
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const droppedFile = event.dataTransfer.files[0];
+    setFile(droppedFile);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
 
   const extractAudioFromVideo = async (file) => {
     return new Promise((resolve, reject) => {
@@ -168,7 +173,7 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language); // Pass the selected language
 
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/upload', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -239,26 +244,27 @@ function App() {
           </div>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div
-              {...getRootProps({
-                className: 'bg-gray-100 rounded-3xl p-3 md:p-4 grid gap-4 items-center justify-center border-2 border-dashed border-gray-300 dropzone-container dropzone-border',
-                onClick: open
-              })}
+              className="bg-gray-100 rounded-3xl p-3 md:p-4 grid gap-4 items-center justify-center border-2 border-dashed border-gray-300"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              ref={dropRef}
+              onClick={() => document.getElementById('fileInput').click()} // Manually trigger the file input click event
               style={{ width: '100%', height: '180px', margin: '0 auto' }}
             >
-              <input {...getInputProps()} />
               <div className="flex flex-col items-center justify-center gap-4">
                 <UploadIcon className="w-12 h-12 text-gray-400" />
                 <div className="text-center">
                   <p className="font-medium" style={{ color: '#3F3F3F', marginTop: '-25px' }}>
-                    Drag and drop your video here or <Button variant="link" onClick={open}>click to select a file</Button>
+                    Drag and drop your video here or <Button variant="link">click to select a file</Button>
                   </p>
                 </div>
-                {file && (
-                  <p className="text-center mt-2 text-green-500" style={{ marginTop: '-30px' }}>
-                    File has been uploaded successfully.
-                  </p>
-                )}
+                <input id="fileInput" type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
               </div>
+              {file && (
+                <p className="text-center mt-2 text-green-500" style={{ marginTop: '-30px' }}>
+                  File has been uploaded successfully.
+                </p>
+              )}
             </div>
             <div className="flex items-center justify-center">
               <label htmlFor="language" className="mr-2 text-gray-700">Language:</label>
