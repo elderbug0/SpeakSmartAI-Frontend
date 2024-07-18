@@ -34,12 +34,22 @@ function App() {
 
   const extractAudioFromVideo = async (file) => {
     return new Promise((resolve, reject) => {
+      if (!window.AudioContext && !window.webkitAudioContext) {
+        reject(new Error('AudioContext is not supported in this browser'));
+        return;
+      }
+  
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const reader = new FileReader();
-
+  
       reader.onload = function () {
         const arrayBuffer = reader.result;
-
+        
+        if (!arrayBuffer) {
+          reject(new Error('Failed to read file as array buffer'));
+          return;
+        }
+  
         audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
           const offlineAudioContext = new OfflineAudioContext(
             decodedAudioData.numberOfChannels,
@@ -50,28 +60,26 @@ function App() {
           soundSource.buffer = decodedAudioData;
           soundSource.connect(offlineAudioContext.destination);
           soundSource.start();
-
+  
           offlineAudioContext.startRendering().then((renderedBuffer) => {
             const wavBlob = audioBufferToWav(renderedBuffer);
             resolve(wavBlob);
           }).catch((err) => {
-            console.error('Error during offline audio rendering:', err);
-            reject(err);
+            reject(new Error('Error rendering offline audio context: ' + err.message));
           });
         }).catch((err) => {
-          console.error('Error decoding audio data:', err);
-          reject(err);
+          reject(new Error('Error decoding audio data: ' + err.message));
         });
       };
-
-      reader.onerror = function (err) {
-        console.error('Error reading file:', err);
-        reject(err);
+  
+      reader.onerror = function () {
+        reject(new Error('Error reading file: ' + reader.error.message));
       };
-
+  
       reader.readAsArrayBuffer(file);
     });
   };
+  
 
   const audioBufferToWav = (buffer) => {
     const numOfChan = buffer.numberOfChannels,
