@@ -148,19 +148,19 @@ function App() {
     setGptResponse(null);
     setLoadingStage('uploading');
     setAudioProcessing(true);
-
+  
     try {
       const audioBlob = await extractAudioFromVideo(file);
-
+  
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
-      audioFormData.append('language', language);
-
+      audioFormData.append('language', language); // Pass the selected language
+  
       const videoFormData = new FormData();
       videoFormData.append('video', file);
-      videoFormData.append('language', language);
-
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
+      videoFormData.append('language', language); // Pass the selected language
+  
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/upload', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -168,11 +168,12 @@ function App() {
         const publicId = audioUploadResponse.data.public_id;
         pollAudioProcessingStatus(publicId);
       }).catch(err => {
+        console.error('Error uploading audio file:', err);
         setError('Error uploading audio file');
         setLoadingStage(null);
         setAudioProcessing(false);
       });
-
+  
       axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -181,17 +182,19 @@ function App() {
         setVideoResponse(videoUploadResponse.data);
         setLoadingStage(null);
       }).catch(err => {
+        console.error('Error uploading video file:', err);
         setError('Error uploading video file');
         setLoadingStage(null);
       });
-
+  
     } catch (err) {
+      console.error('Error processing file:', err);
       setError('Error processing file');
       setLoadingStage(null);
       setAudioProcessing(false);
     }
   };
-
+  
   const handleLanguageChange = (event) => {
     setLanguage(event.target.value);
   };
