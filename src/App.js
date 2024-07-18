@@ -5,7 +5,6 @@ import { FaUpload, FaChartLine, FaComment } from 'react-icons/fa';
 import { Button } from './components/ui/Button';
 import './styles/tailwind.css';
 import ResultsPage from './ResultsPage';
-import { Platform } from 'react-native'; // Add this import for Platform
 
 function App() {
   const [file, setFile] = useState(null);
@@ -20,28 +19,13 @@ function App() {
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      setFile({
-        uri: URL.createObjectURL(selectedFile),
-        type: selectedFile.type,
-        name: selectedFile.name,
-        rawFile: selectedFile
-      });
-    }
+    setFile(event.target.files[0]);
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files[0];
-    if (droppedFile) {
-      setFile({
-        uri: URL.createObjectURL(droppedFile),
-        type: droppedFile.type,
-        name: droppedFile.name,
-        rawFile: droppedFile
-      });
-    }
+    setFile(droppedFile);
   };
 
   const handleDragOver = (event) => {
@@ -85,7 +69,7 @@ function App() {
         reject(err);
       };
 
-      reader.readAsArrayBuffer(file.rawFile);
+      reader.readAsArrayBuffer(file);
     });
   };
 
@@ -179,14 +163,14 @@ function App() {
     setAudioProcessing(true);
 
     try {
-      const audioBlob = await extractAudioFromVideo(file.rawFile);
+      const audioBlob = await extractAudioFromVideo(file);
 
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
       audioFormData.append('language', language); // Pass the selected language
 
       const videoFormData = new FormData();
-      videoFormData.append('video', file.rawFile);
+      videoFormData.append('video', file);
       videoFormData.append('language', language); // Pass the selected language
 
       axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
@@ -203,13 +187,7 @@ function App() {
         setAudioProcessing(false);
       });
 
-      const videoUri = Platform.OS === 'android' ? file.uri : file.uri.replace('file://', '');
-
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', {
-        uri: videoUri,
-        type: file.type,
-        name: file.name
-      }, {
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -270,14 +248,13 @@ function App() {
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               ref={dropRef}
-              onClick={() => document.getElementById('fileInput').click()} // Manually trigger the file input click event
               style={{ width: '100%', height: '180px', margin: '0 auto' }}
             >
               <div className="flex flex-col items-center justify-center gap-4">
                 <UploadIcon className="w-12 h-12 text-gray-400" />
                 <div className="text-center">
                   <p className="font-medium" style={{ color: '#3F3F3F', marginTop: '-25px' }}>
-                    Drag and drop your video here or <Button variant="link">click to select a file</Button>
+                    Drag and drop your video here or <Button variant="link" onClick={() => document.getElementById('fileInput').click()}>click to select a file</Button>
                   </p>
                 </div>
                 <input id="fileInput" type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
