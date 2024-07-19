@@ -18,24 +18,29 @@ function App() {
   const dropRef = useRef(null);
   const navigate = useNavigate();
 
+  const renameFile = (originalFile) => {
+    const newName = `uploaded_video.${originalFile.type.split('/')[1]}`; // e.g., uploaded_video.mp4
+    return new File([originalFile], newName, { type: originalFile.type });
+  };
+
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    console.log('Selected file:', file);
-    if (file) {
-      const decodedPath = decodeURIComponent(file.path || file.name);
-      console.log('Decoded file path:', decodedPath);
-      setFile(new File([file], decodedPath));
+    const originalFile = event.target.files[0];
+    console.log('Selected file:', originalFile);
+    if (originalFile) {
+      const renamedFile = renameFile(originalFile);
+      console.log('Renamed file:', renamedFile);
+      setFile(renamedFile);
     }
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
-    const droppedFile = event.dataTransfer.files[0];
-    console.log('Dropped file:', droppedFile);
-    if (droppedFile) {
-      const decodedPath = decodeURIComponent(droppedFile.path || droppedFile.name);
-      console.log('Decoded dropped file path:', decodedPath);
-      setFile(new File([droppedFile], decodedPath));
+    const originalFile = event.dataTransfer.files[0];
+    console.log('Dropped file:', originalFile);
+    if (originalFile) {
+      const renamedFile = renameFile(originalFile);
+      console.log('Renamed dropped file:', renamedFile);
+      setFile(renamedFile);
     }
   };
 
@@ -50,7 +55,6 @@ function App() {
 
       reader.onload = function () {
         const arrayBuffer = reader.result;
-
         audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
           const offlineAudioContext = new OfflineAudioContext(
             decodedAudioData.numberOfChannels,
