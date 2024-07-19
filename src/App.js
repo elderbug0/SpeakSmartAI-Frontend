@@ -19,7 +19,8 @@ function App() {
   const navigate = useNavigate();
 
   const renameFile = (originalFile) => {
-    const newName = `uploaded_video.${originalFile.type.split('/')[1]}`; // e.g., uploaded_video.mp4
+    const fileType = originalFile.type.split('/')[1]; // Get the file extension from the MIME type
+    const newName = `uploaded_video.${fileType}`; // e.g., uploaded_video.mp4
     return new File([originalFile], newName, { type: originalFile.type });
   };
 
@@ -87,6 +88,7 @@ function App() {
       reader.readAsArrayBuffer(file);
     });
   };
+
 
   const audioBufferToWav = (buffer) => {
     const numOfChan = buffer.numberOfChannels,
