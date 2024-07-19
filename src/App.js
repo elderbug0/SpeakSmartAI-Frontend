@@ -40,7 +40,7 @@ function App() {
       reader.onload = function () {
         const arrayBuffer = reader.result;
 
-        audioContext.decodeAudioData(arrayBuffer, (decodedAudioData) => {
+        audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
           const offlineAudioContext = new OfflineAudioContext(
             decodedAudioData.numberOfChannels,
             decodedAudioData.duration * decodedAudioData.sampleRate,
@@ -58,7 +58,7 @@ function App() {
             console.error('Error during offline audio rendering:', err);
             reject(err);
           });
-        }, (err) => {
+        }).catch((err) => {
           console.error('Error decoding audio data:', err);
           reject(err);
         });
