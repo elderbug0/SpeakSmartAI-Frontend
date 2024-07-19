@@ -18,31 +18,14 @@ function App() {
   const dropRef = useRef(null);
   const navigate = useNavigate();
 
-  const renameFile = (originalFile) => {
-    const fileType = originalFile.type.split('/')[1]; // Get the file extension from the MIME type
-    const newName = `uploaded_video.${fileType}`; // e.g., uploaded_video.mp4
-    return new File([originalFile], newName, { type: originalFile.type });
-  };
-
   const handleFileChange = (event) => {
-    const originalFile = event.target.files[0];
-    console.log('Selected file:', originalFile);
-    if (originalFile) {
-      const renamedFile = renameFile(originalFile);
-      console.log('Renamed file:', renamedFile);
-      setFile(renamedFile);
-    }
+    setFile(event.target.files[0]);
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
-    const originalFile = event.dataTransfer.files[0];
-    console.log('Dropped file:', originalFile);
-    if (originalFile) {
-      const renamedFile = renameFile(originalFile);
-      console.log('Renamed dropped file:', renamedFile);
-      setFile(renamedFile);
-    }
+    const droppedFile = event.dataTransfer.files[0];
+    setFile(droppedFile);
   };
 
   const handleDragOver = (event) => {
@@ -56,6 +39,7 @@ function App() {
 
       reader.onload = function () {
         const arrayBuffer = reader.result;
+
         audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
           const offlineAudioContext = new OfflineAudioContext(
             decodedAudioData.numberOfChannels,
@@ -88,7 +72,6 @@ function App() {
       reader.readAsArrayBuffer(file);
     });
   };
-
 
   const audioBufferToWav = (buffer) => {
     const numOfChan = buffer.numberOfChannels,
