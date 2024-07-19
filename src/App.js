@@ -19,13 +19,24 @@ function App() {
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+    const file = event.target.files[0];
+    console.log('Selected file:', file);
+    if (file) {
+      const decodedPath = decodeURIComponent(file.path || file.name);
+      console.log('Decoded file path:', decodedPath);
+      setFile(new File([file], decodedPath));
+    }
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files[0];
-    setFile(droppedFile);
+    console.log('Dropped file:', droppedFile);
+    if (droppedFile) {
+      const decodedPath = decodeURIComponent(droppedFile.path || droppedFile.name);
+      console.log('Decoded dropped file path:', decodedPath);
+      setFile(new File([droppedFile], decodedPath));
+    }
   };
 
   const handleDragOver = (event) => {
