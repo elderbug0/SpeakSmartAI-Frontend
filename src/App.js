@@ -19,14 +19,29 @@ function App() {
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+    const selectedFile = event.target.files[0];
+    const fileType = selectedFile.type;
+  
+    if (fileType === 'video/mp4' || fileType === 'video/quicktime') { // 'video/quicktime' is the MIME type for .mov files
+      setFile(selectedFile);
+    } else {
+      setError('Unsupported file type. Please upload an MP4 or MOV video.');
+    }
   };
+  
 
   const handleDrop = (event) => {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files[0];
-    setFile(droppedFile);
+    const fileType = droppedFile.type;
+  
+    if (fileType === 'video/mp4' || fileType === 'video/quicktime') {
+      setFile(droppedFile);
+    } else {
+      setError('Unsupported file type. Please upload an MP4 or MOV video.');
+    }
   };
+  
 
   const handleDragOver = (event) => {
     event.preventDefault();
