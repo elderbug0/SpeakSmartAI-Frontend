@@ -56,17 +56,17 @@ function App() {
             resolve(wavBlob);
           }).catch((err) => {
             console.error('Error during offline audio rendering:', err);
-            reject(err);
+            reject(new Error('Error during offline audio rendering.'));
           });
         }).catch((err) => {
           console.error('Error decoding audio data:', err);
-          reject(err);
+          reject(new Error('Error decoding audio data.'));
         });
       };
 
       reader.onerror = function (err) {
         console.error('Error reading file:', err);
-        reject(err);
+        reject(new Error('Error reading file.'));
       };
 
       reader.readAsArrayBuffer(file);
@@ -257,7 +257,7 @@ function App() {
                     Drag and drop your video here or <Button variant="link" onClick={() => document.getElementById('fileInput').click()}>click to select a file</Button>
                   </p>
                 </div>
-                <input id="fileInput" type="file" accept="video/mp4, video/quicktime" onChange={handleFileChange} className="hidden" />
+                <input id="fileInput" type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
               </div>
               {file && (
                 <p className="text-center mt-2 text-green-500" style={{ marginTop: '-30px' }}>
