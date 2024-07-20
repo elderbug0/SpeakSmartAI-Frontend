@@ -56,17 +56,17 @@ function App() {
             resolve(wavBlob);
           }).catch((err) => {
             console.error('Error during offline audio rendering:', err);
-            reject(new Error('Error during offline audio rendering.'));
+            reject(err);
           });
         }).catch((err) => {
           console.error('Error decoding audio data:', err);
-          reject(new Error('Error decoding audio data.'));
+          reject(err);
         });
       };
 
       reader.onerror = function (err) {
         console.error('Error reading file:', err);
-        reject(new Error('Error reading file.'));
+        reject(err);
       };
 
       reader.readAsArrayBuffer(file);
@@ -163,14 +163,21 @@ function App() {
     setAudioProcessing(true);
 
     try {
-      const audioBlob = await extractAudioFromVideo(file);
-
+      // Rename the file if it has a .mov extension
+      let renamedFile = file;
+      if (file && file.name.endsWith('.mov')) {
+        const renamedFileName = file.name.replace('.mov', '.mp4');
+        renamedFile = new File([file], renamedFileName, { type: 'video/mp4' });
+      }
+  
+      const audioBlob = await extractAudioFromVideo(renamedFile);
+  
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
       audioFormData.append('language', language); // Pass the selected language
-
+  
       const videoFormData = new FormData();
-      videoFormData.append('video', file);
+      videoFormData.append('video', renamedFile);
       videoFormData.append('language', language); // Pass the selected language
 
       axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {

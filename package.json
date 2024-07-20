@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
     "cors": "^2.8.5",
+    "ffmpeg.js": "^4.2.9003",
     "fluent-ffmpeg": "^2.1.3",
     "mux.js": "^6.3.0",
     "react": "^18.3.1",
