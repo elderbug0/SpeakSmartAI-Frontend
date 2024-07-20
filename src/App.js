@@ -113,7 +113,7 @@ function App() {
       offset++;
     }
 
-    return new Blob([bufferArray], { type: "audio/wav" });
+    return new Blob([bufferArray], { type: "audio/mp3" });
 
     function setUint16(data) {
       view.setUint16(pos, data, true);
@@ -163,21 +163,14 @@ function App() {
     setAudioProcessing(true);
 
     try {
-      // Rename the file if it has a .mov extension
-      let renamedFile = file;
-      if (file && file.name.endsWith('.mov')) {
-        const renamedFileName = file.name.replace('.mov', '.mp4');
-        renamedFile = new File([file], renamedFileName, { type: 'video/mp4' });
-      }
-  
-      const audioBlob = await extractAudioFromVideo(renamedFile);
-  
+      const audioBlob = await extractAudioFromVideo(file);
+
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
       audioFormData.append('language', language); // Pass the selected language
-  
+
       const videoFormData = new FormData();
-      videoFormData.append('video', renamedFile);
+      videoFormData.append('video', file);
       videoFormData.append('language', language); // Pass the selected language
 
       axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
