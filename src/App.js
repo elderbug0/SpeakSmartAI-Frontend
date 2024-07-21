@@ -40,6 +40,7 @@ function App() {
       const reader = new FileReader();
 
       reader.onload = function () {
+        console.error('Failed to read file:');
         const arrayBuffer = reader.result;
         console.log("File read successfully. Decoding audio data...");
 
@@ -274,7 +275,7 @@ function App() {
                     Drag and drop your video here or <Button variant="link" onClick={() => document.getElementById('fileInput').click()}>click to select a file</Button>
                   </p>
                 </div>
-                <input id="fileInput" type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
+                <input id="fileInput" type="file" accept="video/*,.mov" onChange={handleFileChange} className="hidden" />
               </div>
               {file && (
                 <p className="text-center mt-2 text-green-500" style={{ marginTop: '-30px' }}>
