@@ -100,64 +100,54 @@ function App() {
     }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError(null);
-    setAudioResponse(null);
-    setVideoResponse(null);
-    setGptResponse(null);
-    setLoadingStage('uploading');
-    setAudioProcessing(true);
+ const handleSubmit = async (event) => {
+  event.preventDefault();
+  setError(null);
+  setAudioResponse(null);
+  setVideoResponse(null);
+  setGptResponse(null);
+  setLoadingStage('uploading');
+  setAudioProcessing(true);
 
-    try {
-      console.log("Extracting audio from video...");
-      const audioBlob = await extractAudioFromVideo(file);
-      console.log("Audio extraction completed. Uploading files...");
+  try {
+    console.log("Extracting audio from video...");
+    const audioBlob = await extractAudioFromVideo(file);
+    console.log("Audio extraction completed. Uploading files...");
 
-      const audioFormData = new FormData();
-      audioFormData.append('audio', audioBlob, 'audio.wav');
-      audioFormData.append('language', language); // Pass the selected language
+    const audioFormData = new FormData();
+    audioFormData.append('audio', audioBlob, 'audio.wav');
+    audioFormData.append('language', language); // Pass the selected language
 
-      const videoFormData = new FormData();
-      videoFormData.append('video', file);
-      videoFormData.append('language', language); // Pass the selected language
+    const videoFormData = new FormData();
+    videoFormData.append('video', file);
+    videoFormData.append('language', language); // Pass the selected language
 
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then(audioUploadResponse => {
-        console.log("Audio upload response:", audioUploadResponse.data);
-        const publicId = audioUploadResponse.data.public_id;
-        pollAudioProcessingStatus(publicId);
-      }).catch(err => {
-        console.error('Error uploading audio file:', err);
-        setError('Error uploading audio file');
-        setLoadingStage(null);
-        setAudioProcessing(false);
-      });
+    const audioUploadResponse = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/upload', audioFormData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    console.log("Audio upload response:", audioUploadResponse.data);
+    const publicId = audioUploadResponse.data.public_id;
+    pollAudioProcessingStatus(publicId);
 
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then(videoUploadResponse => {
-        console.log("Video upload response:", videoUploadResponse.data);
-        setVideoResponse(videoUploadResponse.data);
-        setLoadingStage(null);
-      }).catch(err => {
-        console.error('Error uploading video file:', err);
-        setError('Error uploading video file');
-        setLoadingStage(null);
-      });
+    const videoUploadResponse = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    console.log("Video upload response:", videoUploadResponse.data);
+    setVideoResponse(videoUploadResponse.data);
+    setLoadingStage(null);
+    
+  } catch (err) {
+    console.error('Error processing file:', err);
+    setError('Error processing file');
+    setLoadingStage(null);
+    setAudioProcessing(false);
+  }
+};
 
-    } catch (err) {
-      console.error('Error processing file:', err);
-      setError('Error processing file');
-      setLoadingStage(null);
-      setAudioProcessing(false);
-    }
-  };
 
   const pollAudioProcessingStatus = async (publicId) => {
     try {
