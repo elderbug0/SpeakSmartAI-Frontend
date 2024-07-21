@@ -36,7 +36,13 @@ function App() {
 
   const extractAudioFromVideo = async (file) => {
     return new Promise((resolve, reject) => {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (!window.AudioContext) {
+        if (!window.webkitAudioContext) {
+            alert("Your browser does not support any AudioContext and cannot play back this audio.");
+            return;
+        }
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
       const reader = new FileReader();
 
       reader.onload = function () {
