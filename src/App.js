@@ -19,12 +19,14 @@ function App() {
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
+    console.log("File selected:", event.target.files[0]);
     setFile(event.target.files[0]);
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files[0];
+    console.log("File dropped:", droppedFile);
     setFile(droppedFile);
   };
 
@@ -39,8 +41,10 @@ function App() {
 
       reader.onload = function () {
         const arrayBuffer = reader.result;
+        console.log("File read successfully. Decoding audio data...");
 
         audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
+          console.log("Audio data decoded. Rendering offline audio context...");
           const offlineAudioContext = new OfflineAudioContext(
             decodedAudioData.numberOfChannels,
             decodedAudioData.duration * decodedAudioData.sampleRate,
@@ -52,6 +56,7 @@ function App() {
           soundSource.start();
 
           offlineAudioContext.startRendering().then((renderedBuffer) => {
+            console.log("Offline audio rendering completed.");
             const wavBlob = audioBufferToWav(renderedBuffer);
             resolve(wavBlob);
           }).catch((err) => {
@@ -113,7 +118,7 @@ function App() {
       offset++;
     }
 
-    return new Blob([bufferArray], { type: "audio/mp3" });
+    return new Blob([bufferArray], { type: "audio/wav" });
 
     function setUint16(data) {
       view.setUint16(pos, data, true);
@@ -128,10 +133,12 @@ function App() {
 
   const pollAudioProcessingStatus = async (publicId) => {
     try {
+      console.log("Polling audio processing status for public ID:", publicId);
       const response = await axios.get(`https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/status/${publicId}`);
       if (response.data.status === 'processing') {
         setTimeout(() => pollAudioProcessingStatus(publicId), 3000); // poll every 3 seconds
       } else {
+        console.log("Audio processing completed:", response.data);
         setAudioResponse(response.data);
         setAudioProcessing(false);
         analyzeTextWithGpt(response.data.results.amazon.text);
@@ -145,7 +152,9 @@ function App() {
 
   const analyzeTextWithGpt = async (text) => {
     try {
+      console.log("Analyzing text with GPT-3:", text);
       const response = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/analyze-text', { text });
+      console.log("GPT-3 analysis completed:", response.data);
       setGptResponse(response.data);
     } catch (error) {
       console.error('Error analyzing text with GPT-3:', error);
@@ -163,7 +172,9 @@ function App() {
     setAudioProcessing(true);
 
     try {
+      console.log("Extracting audio from video...");
       const audioBlob = await extractAudioFromVideo(file);
+      console.log("Audio extraction completed. Uploading files...");
 
       const audioFormData = new FormData();
       audioFormData.append('audio', audioBlob, 'audio.wav');
@@ -178,6 +189,7 @@ function App() {
           'Content-Type': 'multipart/form-data'
         }
       }).then(audioUploadResponse => {
+        console.log("Audio upload response:", audioUploadResponse.data);
         const publicId = audioUploadResponse.data.public_id;
         pollAudioProcessingStatus(publicId);
       }).catch(err => {
@@ -192,6 +204,7 @@ function App() {
           'Content-Type': 'multipart/form-data'
         }
       }).then(videoUploadResponse => {
+        console.log("Video upload response:", videoUploadResponse.data);
         setVideoResponse(videoUploadResponse.data);
         setLoadingStage(null);
       }).catch(err => {
@@ -209,10 +222,14 @@ function App() {
   };
 
   const handleLanguageChange = (event) => {
+    console.log("Language changed to:", event.target.value);
     setLanguage(event.target.value);
   };
 
   const handleSeeResults = () => {
+    console.log("Navigating to results page with responses:", {
+      audioResponse, videoResponse, gptResponse
+    });
     navigate('/results', { state: { audioResponse, videoResponse, gptResponse } });
   };
 
