@@ -19,14 +19,12 @@ function App() {
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
-    console.log("File selected:", event.target.files[0]);
     setFile(event.target.files[0]);
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files[0];
-    console.log("File dropped:", droppedFile);
     setFile(droppedFile);
   };
 
@@ -36,49 +34,34 @@ function App() {
 
   const extractAudioFromVideo = async (file) => {
     return new Promise((resolve, reject) => {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) {
-        alert("Your browser does not support any AudioContext and cannot play back this audio.");
-        return;
-      }
-
-      const audioContext = new AudioContext(); // Defined inside the function
-      const reader = new FileReader(); // Defined inside the function
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const reader = new FileReader();
 
       reader.onload = function () {
         const arrayBuffer = reader.result;
-        console.log("File read successfully. ArrayBuffer:", arrayBuffer);
 
-        // Temporarily remove decodeAudioData for testing purposes
-        // audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
-        //   console.log("Audio data decoded. Rendering offline audio context...");
-        //   const offlineAudioContext = new OfflineAudioContext(
-        //     decodedAudioData.numberOfChannels,
-        //     decodedAudioData.duration * decodedAudioData.sampleRate,
-        //     decodedAudioData.sampleRate
-        //   );
-        //   const soundSource = offlineAudioContext.createBufferSource();
-        //   soundSource.buffer = decodedAudioData;
-        //   soundSource.connect(offlineAudioContext.destination);
-        //   soundSource.start();
+        audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
+          const offlineAudioContext = new OfflineAudioContext(
+            decodedAudioData.numberOfChannels,
+            decodedAudioData.duration * decodedAudioData.sampleRate,
+            decodedAudioData.sampleRate
+          );
+          const soundSource = offlineAudioContext.createBufferSource();
+          soundSource.buffer = decodedAudioData;
+          soundSource.connect(offlineAudioContext.destination);
+          soundSource.start();
 
-        //   offlineAudioContext.startRendering().then((renderedBuffer) => {
-        //     console.log("Offline audio rendering completed.");
-        //     const wavBlob = audioBufferToWav(renderedBuffer);
-        //     resolve(wavBlob);
-        //   }).catch((err) => {
-        //     console.error('Error during offline audio rendering:', err);
-        //     reject(err);
-        //   });
-        // }).catch((err) => {
-        //   console.error('Error decoding audio data:', err);
-        //   reject(err);
-        // });
-
-        // For testing: immediately resolve with a dummy Blob
-        console.log("Skipping audio decoding for testing purposes.");
-        const dummyBlob = new Blob(["Dummy audio data"], { type: "audio/wav" });
-        resolve(dummyBlob);
+          offlineAudioContext.startRendering().then((renderedBuffer) => {
+            const wavBlob = audioBufferToWav(renderedBuffer);
+            resolve(wavBlob);
+          }).catch((err) => {
+            console.error('Error during offline audio rendering:', err);
+            reject(err);
+          });
+        }).catch((err) => {
+          console.error('Error decoding audio data:', err);
+          reject(err);
+        });
       };
 
       reader.onerror = function (err) {
@@ -90,73 +73,65 @@ function App() {
     });
   };
 
-  // Test function to see if extractAudioFromVideo works without decoding
-  const testExtractAudio = async (file) => {
-    try {
-      const result = await extractAudioFromVideo(file);
-      console.log("Test successful. Result:", result);
-    } catch (error) {
-      console.error("Test failed. Error:", error);
+  const audioBufferToWav = (buffer) => {
+    const numOfChan = buffer.numberOfChannels,
+      length = buffer.length * numOfChan * 2 + 44,
+      bufferArray = new ArrayBuffer(length),
+      view = new DataView(bufferArray),
+      channels = [],
+      sampleRate = buffer.sampleRate;
+
+    let offset = 0;
+    let pos = 0;
+
+    setUint32(0x46464952); // "RIFF"
+    setUint32(length - 8); // file length - 8
+    setUint32(0x45564157); // "WAVE"
+
+    setUint32(0x20746d66); // "fmt " chunk
+    setUint32(16); // length = 16
+    setUint16(1); // PCM (uncompressed)
+    setUint16(numOfChan);
+    setUint32(sampleRate);
+    setUint32(sampleRate * 2 * numOfChan); // avg. bytes/sec
+    setUint16(numOfChan * 2); // block-align
+    setUint16(16); // 16-bit (hardcoded in this demo)
+
+    setUint32(0x61746164); // "data" - chunk
+    setUint32(length - pos - 4); // chunk length
+
+    for (let i = 0; i < buffer.numberOfChannels; i++) {
+      channels.push(buffer.getChannelData(i));
+    }
+
+    while (pos < length) {
+      for (let i = 0; i < numOfChan; i++) {
+        const sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
+        view.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true); // write 16-bit sample
+        pos += 2;
+      }
+      offset++;
+    }
+
+    return new Blob([bufferArray], { type: "audio/wav" });
+
+    function setUint16(data) {
+      view.setUint16(pos, data, true);
+      pos += 2;
+    }
+
+    function setUint32(data) {
+      view.setUint32(pos, data, true);
+      pos += 4;
     }
   };
 
- const handleSubmit = async (event) => {
-  event.preventDefault();
-  setError(null);
-  setAudioResponse(null);
-  setVideoResponse(null);
-  setGptResponse(null);
-  setLoadingStage('uploading');
-  setAudioProcessing(true);
-
-  try {
-    console.log("Extracting audio from video...");
-    const audioBlob = await extractAudioFromVideo(file);
-    console.log("Audio extraction completed. Uploading files...");
-
-    const audioFormData = new FormData();
-    audioFormData.append('audio', audioBlob, 'audio.wav');
-    audioFormData.append('language', language); // Pass the selected language
-
-    const videoFormData = new FormData();
-    videoFormData.append('video', file);
-    videoFormData.append('language', language); // Pass the selected language
-
-    const audioUploadResponse = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/upload', audioFormData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    console.log("Audio upload response:", audioUploadResponse.data);
-    const publicId = audioUploadResponse.data.public_id;
-    pollAudioProcessingStatus(publicId);
-
-    const videoUploadResponse = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    console.log("Video upload response:", videoUploadResponse.data);
-    setVideoResponse(videoUploadResponse.data);
-    setLoadingStage(null);
-    
-  } catch (err) {
-    console.error('Error processing file:', err);
-    setError('Error processing file');
-    setLoadingStage(null);
-    setAudioProcessing(false);
-  }
-};
-
-
   const pollAudioProcessingStatus = async (publicId) => {
     try {
-      console.log("Polling audio processing status for public ID:", publicId);
       const response = await axios.get(`https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/status/${publicId}`);
       if (response.data.status === 'processing') {
         setTimeout(() => pollAudioProcessingStatus(publicId), 3000); // poll every 3 seconds
       } else {
-        console.log("Audio processing completed:", response.data);
         setAudioResponse(response.data);
         setAudioProcessing(false);
         analyzeTextWithGpt(response.data.results.amazon.text);
@@ -170,9 +145,7 @@ function App() {
 
   const analyzeTextWithGpt = async (text) => {
     try {
-      console.log("Analyzing text with GPT-3:", text);
       const response = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/analyze-text', { text });
-      console.log("GPT-3 analysis completed:", response.data);
       setGptResponse(response.data);
     } catch (error) {
       console.error('Error analyzing text with GPT-3:', error);
@@ -180,15 +153,66 @@ function App() {
     }
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError(null);
+    setAudioResponse(null);
+    setVideoResponse(null);
+    setGptResponse(null);
+    setLoadingStage('uploading');
+    setAudioProcessing(true);
+
+    try {
+      const audioBlob = await extractAudioFromVideo(file);
+
+      const audioFormData = new FormData();
+      audioFormData.append('audio', audioBlob, 'audio.wav');
+      audioFormData.append('language', language); // Pass the selected language
+
+      const videoFormData = new FormData();
+      videoFormData.append('video', file);
+      videoFormData.append('language', language); // Pass the selected language
+
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(audioUploadResponse => {
+        const publicId = audioUploadResponse.data.public_id;
+        pollAudioProcessingStatus(publicId);
+      }).catch(err => {
+        console.error('Error uploading audio file:', err);
+        setError('Error uploading audio file');
+        setLoadingStage(null);
+        setAudioProcessing(false);
+      });
+
+      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(videoUploadResponse => {
+        setVideoResponse(videoUploadResponse.data);
+        setLoadingStage(null);
+      }).catch(err => {
+        console.error('Error uploading video file:', err);
+        setError('Error uploading video file');
+        setLoadingStage(null);
+      });
+
+    } catch (err) {
+      console.error('Error processing file:', err);
+      setError('Error processing file');
+      setLoadingStage(null);
+      setAudioProcessing(false);
+    }
+  };
+
   const handleLanguageChange = (event) => {
-    console.log("Language changed to:", event.target.value);
     setLanguage(event.target.value);
   };
 
   const handleSeeResults = () => {
-    console.log("Navigating to results page with responses:", {
-      audioResponse, videoResponse, gptResponse
-    });
     navigate('/results', { state: { audioResponse, videoResponse, gptResponse } });
   };
 
