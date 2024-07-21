@@ -41,131 +41,62 @@ function App() {
         alert("Your browser does not support any AudioContext and cannot play back this audio.");
         return;
       }
-  
-      const audioContext = new AudioContext();
-      const reader = new FileReader();
-  
+
+      const audioContext = new AudioContext(); // Defined inside the function
+      const reader = new FileReader(); // Defined inside the function
+
       reader.onload = function () {
         const arrayBuffer = reader.result;
-        console.log("File read successfully. Decoding audio data...");
-  
-        audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
-          console.log("Audio data decoded. Rendering offline audio context...");
-          const offlineAudioContext = new OfflineAudioContext(
-            decodedAudioData.numberOfChannels,
-            decodedAudioData.duration * decodedAudioData.sampleRate,
-            decodedAudioData.sampleRate
-          );
-          const soundSource = offlineAudioContext.createBufferSource();
-          soundSource.buffer = decodedAudioData;
-          soundSource.connect(offlineAudioContext.destination);
-          soundSource.start();
-  
-          offlineAudioContext.startRendering().then((renderedBuffer) => {
-            console.log("Offline audio rendering completed.");
-            const wavBlob = audioBufferToWav(renderedBuffer);
-            resolve(wavBlob);
-          }).catch((err) => {
-            console.error('Error during offline audio rendering:', err);
-            reject(err);
-          });
-        }).catch((err) => {
-          console.error('Error decoding audio data:', err);
-          reject(err);
-        });
+        console.log("File read successfully. ArrayBuffer:", arrayBuffer);
+
+        // Temporarily remove decodeAudioData for testing purposes
+        // audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
+        //   console.log("Audio data decoded. Rendering offline audio context...");
+        //   const offlineAudioContext = new OfflineAudioContext(
+        //     decodedAudioData.numberOfChannels,
+        //     decodedAudioData.duration * decodedAudioData.sampleRate,
+        //     decodedAudioData.sampleRate
+        //   );
+        //   const soundSource = offlineAudioContext.createBufferSource();
+        //   soundSource.buffer = decodedAudioData;
+        //   soundSource.connect(offlineAudioContext.destination);
+        //   soundSource.start();
+
+        //   offlineAudioContext.startRendering().then((renderedBuffer) => {
+        //     console.log("Offline audio rendering completed.");
+        //     const wavBlob = audioBufferToWav(renderedBuffer);
+        //     resolve(wavBlob);
+        //   }).catch((err) => {
+        //     console.error('Error during offline audio rendering:', err);
+        //     reject(err);
+        //   });
+        // }).catch((err) => {
+        //   console.error('Error decoding audio data:', err);
+        //   reject(err);
+        // });
+
+        // For testing: immediately resolve with a dummy Blob
+        console.log("Skipping audio decoding for testing purposes.");
+        const dummyBlob = new Blob(["Dummy audio data"], { type: "audio/wav" });
+        resolve(dummyBlob);
       };
-  
+
       reader.onerror = function (err) {
         console.error('Error reading file:', err);
         reject(err);
       };
-  
+
       reader.readAsArrayBuffer(file);
     });
   };
-  
-  const audioBufferToWav = (buffer) => {
-    const numOfChan = buffer.numberOfChannels,
-      length = buffer.length * numOfChan * 2 + 44,
-      bufferArray = new ArrayBuffer(length),
-      view = new DataView(bufferArray),
-      channels = [],
-      sampleRate = buffer.sampleRate;
-  
-    let offset = 0;
-    let pos = 0;
-  
-    setUint32(0x46464952); // "RIFF"
-    setUint32(length - 8); // file length - 8
-    setUint32(0x45564157); // "WAVE"
-  
-    setUint32(0x20746d66); // "fmt " chunk
-    setUint32(16); // length = 16
-    setUint16(1); // PCM (uncompressed)
-    setUint16(numOfChan);
-    setUint32(sampleRate);
-    setUint32(sampleRate * 2 * numOfChan); // avg. bytes/sec
-    setUint16(numOfChan * 2); // block-align
-    setUint16(16); // 16-bit (hardcoded in this demo)
-  
-    setUint32(0x61746164); // "data" - chunk
-    setUint32(length - pos - 4); // chunk length
-  
-    for (let i = 0; i < buffer.numberOfChannels; i++) {
-      channels.push(buffer.getChannelData(i));
-    }
-  
-    while (pos < length) {
-      for (let i = 0; i < numOfChan; i++) {
-        const sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
-        view.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true); // write 16-bit sample
-        pos += 2;
-      }
-      offset++;
-    }
-  
-    return new Blob([bufferArray], { type: "audio/wav" });
-  
-    function setUint16(data) {
-      view.setUint16(pos, data, true);
-      pos += 2;
-    }
-  
-    function setUint32(data) {
-      view.setUint32(pos, data, true);
-      pos += 4;
-    }
-  };
-  
 
-  const pollAudioProcessingStatus = async (publicId) => {
+  // Test function to see if extractAudioFromVideo works without decoding
+  const testExtractAudio = async (file) => {
     try {
-      console.log("Polling audio processing status for public ID:", publicId);
-      const response = await axios.get(`https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/status/${publicId}`);
-      if (response.data.status === 'processing') {
-        setTimeout(() => pollAudioProcessingStatus(publicId), 3000); // poll every 3 seconds
-      } else {
-        console.log("Audio processing completed:", response.data);
-        setAudioResponse(response.data);
-        setAudioProcessing(false);
-        analyzeTextWithGpt(response.data.results.amazon.text);
-      }
+      const result = await extractAudioFromVideo(file);
+      console.log("Test successful. Result:", result);
     } catch (error) {
-      console.error('Error polling audio processing status:', error);
-      setError('Error polling audio processing status');
-      setAudioProcessing(false);
-    }
-  };
-
-  const analyzeTextWithGpt = async (text) => {
-    try {
-      console.log("Analyzing text with GPT-3:", text);
-      const response = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/analyze-text', { text });
-      console.log("GPT-3 analysis completed:", response.data);
-      setGptResponse(response.data);
-    } catch (error) {
-      console.error('Error analyzing text with GPT-3:', error);
-      setError('Error analyzing text with GPT-3');
+      console.error("Test failed. Error:", error);
     }
   };
 
@@ -225,6 +156,37 @@ function App() {
       setError('Error processing file');
       setLoadingStage(null);
       setAudioProcessing(false);
+    }
+  };
+
+  const pollAudioProcessingStatus = async (publicId) => {
+    try {
+      console.log("Polling audio processing status for public ID:", publicId);
+      const response = await axios.get(`https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/status/${publicId}`);
+      if (response.data.status === 'processing') {
+        setTimeout(() => pollAudioProcessingStatus(publicId), 3000); // poll every 3 seconds
+      } else {
+        console.log("Audio processing completed:", response.data);
+        setAudioResponse(response.data);
+        setAudioProcessing(false);
+        analyzeTextWithGpt(response.data.results.amazon.text);
+      }
+    } catch (error) {
+      console.error('Error polling audio processing status:', error);
+      setError('Error polling audio processing status');
+      setAudioProcessing(false);
+    }
+  };
+
+  const analyzeTextWithGpt = async (text) => {
+    try {
+      console.log("Analyzing text with GPT-3:", text);
+      const response = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/analyze-text', { text });
+      console.log("GPT-3 analysis completed:", response.data);
+      setGptResponse(response.data);
+    } catch (error) {
+      console.error('Error analyzing text with GPT-3:', error);
+      setError('Error analyzing text with GPT-3');
     }
   };
 
