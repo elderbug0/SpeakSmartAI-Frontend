@@ -36,20 +36,19 @@ function App() {
 
   const extractAudioFromVideo = async (file) => {
     return new Promise((resolve, reject) => {
-      if (!window.AudioContext) {
-        if (!window.webkitAudioContext) {
-            alert("Your browser does not support any AudioContext and cannot play back this audio.");
-            return;
-        }
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) {
+        alert("Your browser does not support any AudioContext and cannot play back this audio.");
+        return;
+      }
+  
+      const audioContext = new AudioContext();
       const reader = new FileReader();
-
+  
       reader.onload = function () {
         const arrayBuffer = reader.result;
-        console.log(arrayBuffer)
         console.log("File read successfully. Decoding audio data...");
-
+  
         audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
           console.log("Audio data decoded. Rendering offline audio context...");
           const offlineAudioContext = new OfflineAudioContext(
@@ -61,7 +60,7 @@ function App() {
           soundSource.buffer = decodedAudioData;
           soundSource.connect(offlineAudioContext.destination);
           soundSource.start();
-
+  
           offlineAudioContext.startRendering().then((renderedBuffer) => {
             console.log("Offline audio rendering completed.");
             const wavBlob = audioBufferToWav(renderedBuffer);
@@ -75,16 +74,16 @@ function App() {
           reject(err);
         });
       };
-
+  
       reader.onerror = function (err) {
         console.error('Error reading file:', err);
         reject(err);
       };
-
+  
       reader.readAsArrayBuffer(file);
     });
   };
-
+  
   const audioBufferToWav = (buffer) => {
     const numOfChan = buffer.numberOfChannels,
       length = buffer.length * numOfChan * 2 + 44,
@@ -92,14 +91,14 @@ function App() {
       view = new DataView(bufferArray),
       channels = [],
       sampleRate = buffer.sampleRate;
-
+  
     let offset = 0;
     let pos = 0;
-
+  
     setUint32(0x46464952); // "RIFF"
     setUint32(length - 8); // file length - 8
     setUint32(0x45564157); // "WAVE"
-
+  
     setUint32(0x20746d66); // "fmt " chunk
     setUint32(16); // length = 16
     setUint16(1); // PCM (uncompressed)
@@ -108,14 +107,14 @@ function App() {
     setUint32(sampleRate * 2 * numOfChan); // avg. bytes/sec
     setUint16(numOfChan * 2); // block-align
     setUint16(16); // 16-bit (hardcoded in this demo)
-
+  
     setUint32(0x61746164); // "data" - chunk
     setUint32(length - pos - 4); // chunk length
-
+  
     for (let i = 0; i < buffer.numberOfChannels; i++) {
       channels.push(buffer.getChannelData(i));
     }
-
+  
     while (pos < length) {
       for (let i = 0; i < numOfChan; i++) {
         const sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
@@ -124,19 +123,20 @@ function App() {
       }
       offset++;
     }
-
+  
     return new Blob([bufferArray], { type: "audio/wav" });
-
+  
     function setUint16(data) {
       view.setUint16(pos, data, true);
       pos += 2;
     }
-
+  
     function setUint32(data) {
       view.setUint32(pos, data, true);
       pos += 4;
     }
   };
+  
 
   const pollAudioProcessingStatus = async (publicId) => {
     try {
