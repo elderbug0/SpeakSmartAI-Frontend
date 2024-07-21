@@ -36,48 +36,48 @@ function App() {
 
   const extractAudioFromVideo = async (file) => {
     return new Promise((resolve, reject) => {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const reader = new FileReader();
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const reader = new FileReader();
 
-        reader.onload = function () {
-            const arrayBuffer = reader.result;
-            console.log("File read successfully. Decoding audio data...");
+      reader.onload = function () {
+        const arrayBuffer = reader.result;
+        console.log(arrayBuffer)
+        console.log("File read successfully. Decoding audio data...");
 
-            audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
-                console.log("Audio data decoded. Rendering offline audio context...");
-                const offlineAudioContext = new OfflineAudioContext(
-                    decodedAudioData.numberOfChannels,
-                    decodedAudioData.duration * decodedAudioData.sampleRate,
-                    decodedAudioData.sampleRate
-                );
-                const soundSource = offlineAudioContext.createBufferSource();
-                soundSource.buffer = decodedAudioData;
-                soundSource.connect(offlineAudioContext.destination);
-                soundSource.start();
+        audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
+          console.log("Audio data decoded. Rendering offline audio context...");
+          const offlineAudioContext = new OfflineAudioContext(
+            decodedAudioData.numberOfChannels,
+            decodedAudioData.duration * decodedAudioData.sampleRate,
+            decodedAudioData.sampleRate
+          );
+          const soundSource = offlineAudioContext.createBufferSource();
+          soundSource.buffer = decodedAudioData;
+          soundSource.connect(offlineAudioContext.destination);
+          soundSource.start();
 
-                offlineAudioContext.startRendering().then((renderedBuffer) => {
-                    console.log("Offline audio rendering completed.");
-                    const wavBlob = audioBufferToWav(renderedBuffer);
-                    resolve(wavBlob);
-                }).catch((err) => {
-                    console.error('Error during offline audio rendering:', err);
-                    reject(err);
-                });
-            }).catch((err) => {
-                console.error('Error decoding audio data:', err);
-                console.error('Possible reasons: Invalid audio format, unsupported codec, or corrupt file.');
-                reject(err);
-            });
-        };
-
-        reader.onerror = function (err) {
-            console.error('Error reading file:', err);
+          offlineAudioContext.startRendering().then((renderedBuffer) => {
+            console.log("Offline audio rendering completed.");
+            const wavBlob = audioBufferToWav(renderedBuffer);
+            resolve(wavBlob);
+          }).catch((err) => {
+            console.error('Error during offline audio rendering:', err);
             reject(err);
-        };
+          });
+        }).catch((err) => {
+          console.error('Error decoding audio data:', err);
+          reject(err);
+        });
+      };
 
-        reader.readAsArrayBuffer(file);
+      reader.onerror = function (err) {
+        console.error('Error reading file:', err);
+        reject(err);
+      };
+
+      reader.readAsArrayBuffer(file);
     });
-};
+  };
 
   const audioBufferToWav = (buffer) => {
     const numOfChan = buffer.numberOfChannels,
