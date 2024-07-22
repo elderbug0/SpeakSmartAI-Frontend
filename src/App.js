@@ -33,14 +33,14 @@ const App = () => {
           setAudioSrc(audioURL);
         };
 
+        videoElement.onended = () => {
+          recorder.stop();
+        };
+
         const playPromise = videoElement.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
             recorder.start();
-            setTimeout(() => {
-              recorder.stop();
-              videoElement.pause();
-            }, 5000); // Adjust the timeout duration as needed
           }).catch((error) => {
             console.error('Error playing the video:', error);
           });
