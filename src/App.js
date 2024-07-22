@@ -36,7 +36,7 @@ function App() {
     return new Promise((resolve, reject) => {
       const videoElement = document.createElement('video');
       videoElement.src = URL.createObjectURL(file);
-      videoElement.muted = true; // Mute the video to avoid audio feedback
+  
 
       videoElement.onloadedmetadata = () => {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
