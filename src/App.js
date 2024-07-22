@@ -3,9 +3,13 @@ import React, { useState } from 'react';
 
 const App = () => {
   const [audioSrc, setAudioSrc] = useState(null);
+  const [file, setFile] = useState(null);
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleFileUpload = async () => {
     if (file && file.type === 'video/quicktime') {
       const videoElement = document.createElement('video');
       videoElement.src = URL.createObjectURL(file);
@@ -42,7 +46,8 @@ const App = () => {
   return (
     <div>
       <h1>Upload MOV and Convert to MP3</h1>
-      <input type="file" accept=".mov" onChange={handleFileUpload} />
+      <input type="file" accept=".mov" onChange={handleFileChange} />
+      <button onClick={handleFileUpload}>Convert to MP3</button>
       {audioSrc && <audio controls src={audioSrc} />}
     </div>
   );
