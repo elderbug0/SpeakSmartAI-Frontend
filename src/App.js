@@ -38,13 +38,12 @@ function App() {
     return new Promise((resolve, reject) => {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const reader = new FileReader();
-
+  
       reader.onload = function () {
-        console.error('Failed to read file:');
         const arrayBuffer = reader.result;
         console.log("File read successfully. Decoding audio data...");
-
-        audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
+  
+        audioContext.decodeAudioData(arrayBuffer, (decodedAudioData) => {
           console.log("Audio data decoded. Rendering offline audio context...");
           const offlineAudioContext = new OfflineAudioContext(
             decodedAudioData.numberOfChannels,
@@ -55,7 +54,7 @@ function App() {
           soundSource.buffer = decodedAudioData;
           soundSource.connect(offlineAudioContext.destination);
           soundSource.start();
-
+  
           offlineAudioContext.startRendering().then((renderedBuffer) => {
             console.log("Offline audio rendering completed.");
             const wavBlob = audioBufferToWav(renderedBuffer);
@@ -64,12 +63,12 @@ function App() {
             console.error('Error during offline audio rendering:', err);
             reject(err);
           });
-        }).catch((err) => {
+        }, (err) => {
           console.error('Error decoding audio data:', err);
           reject(err);
         });
       };
-
+  
       reader.onerror = function (err) {
         console.error('Error reading file:', err);
         reject(err);
@@ -77,7 +76,7 @@ function App() {
 
       reader.readAsArrayBuffer(file);
     });
-  };
+  };  
 
   const audioBufferToWav = (buffer) => {
     const numOfChan = buffer.numberOfChannels,
