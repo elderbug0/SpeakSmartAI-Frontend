@@ -39,97 +39,93 @@ function App() {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const reader = new FileReader();
   
-      reader.onload = function () {
+      reader.onload = async function () {
         const arrayBuffer = reader.result;
         console.log("File read successfully. Decoding audio data...");
   
-        audioContext.decodeAudioData(arrayBuffer, (decodedAudioData) => {
-          console.log("Audio data decoded. Rendering offline audio context...");
-          const offlineAudioContext = new OfflineAudioContext(
-            decodedAudioData.numberOfChannels,
-            decodedAudioData.duration * decodedAudioData.sampleRate,
-            decodedAudioData.sampleRate
-          );
-          const soundSource = offlineAudioContext.createBufferSource();
-          soundSource.buffer = decodedAudioData;
-          soundSource.connect(offlineAudioContext.destination);
-          soundSource.start();
-  
-          offlineAudioContext.startRendering().then((renderedBuffer) => {
-            console.log("Offline audio rendering completed.");
-            const wavBlob = audioBufferToWav(renderedBuffer);
-            resolve(wavBlob);
-          }).catch((err) => {
-            console.error('Error during offline audio rendering:', err);
-            reject(err);
-          });
-        }, (err) => {
-          console.error('Error decoding audio data:', err);
-          reject(err);
-        });
+        try {
+          const decodedAudioData = await audioContext.decodeAudioData(arrayBuffer);
+          console.log("Audio data decoded successfully.");
+          resolve(convertToWav(decodedAudioData));
+        } catch (error) {
+          console.error("Error decoding audio data: ", error);
+          reject(error);
+        }
       };
   
-      reader.onerror = function (err) {
-        console.error('Error reading file:', err);
-        reject(err);
+      reader.onerror = function (error) {
+        console.error('Error reading file:', error);
+        reject(error);
       };
-
+  
       reader.readAsArrayBuffer(file);
     });
-  };  
+  };
+  
+  const convertToWav = (decodedAudioData) => {
+    const offlineAudioContext = new OfflineAudioContext(
+      decodedAudioData.numberOfChannels,
+      decodedAudioData.length,
+      decodedAudioData.sampleRate
+    );
+    const soundSource = offlineAudioContext.createBufferSource();
+    soundSource.buffer = decodedAudioData;
+    soundSource.connect(offlineAudioContext.destination);
+    soundSource.start(0);
+  
+    return offlineAudioContext.startRendering().then((renderedBuffer) => {
+      console.log("Audio rendering completed.");
+      return audioBufferToWav(renderedBuffer);
+    }).catch(error => {
+      console.error("Error during audio rendering: ", error);
+      throw error;
+    });
+  };
+  
 
   const audioBufferToWav = (buffer) => {
     const numOfChan = buffer.numberOfChannels,
       length = buffer.length * numOfChan * 2 + 44,
       bufferArray = new ArrayBuffer(length),
-      view = new DataView(bufferArray),
-      channels = [],
-      sampleRate = buffer.sampleRate;
-
-    let offset = 0;
-    let pos = 0;
-
+      view = new DataView(bufferArray);
+    let offset = 0, pos = 0;
+  
+    const setUint16 = (data) => {
+      view.setUint16(pos, data, true);
+      pos += 2;
+    };
+    const setUint32 = (data) => {
+      view.setUint32(pos, data, true);
+      pos += 4;
+    };
+  
     setUint32(0x46464952); // "RIFF"
     setUint32(length - 8); // file length - 8
     setUint32(0x45564157); // "WAVE"
-
     setUint32(0x20746d66); // "fmt " chunk
     setUint32(16); // length = 16
     setUint16(1); // PCM (uncompressed)
     setUint16(numOfChan);
-    setUint32(sampleRate);
-    setUint32(sampleRate * 2 * numOfChan); // avg. bytes/sec
+    setUint32(buffer.sampleRate);
+    setUint32(buffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
     setUint16(numOfChan * 2); // block-align
-    setUint16(16); // 16-bit (hardcoded in this demo)
-
+    setUint16(16); // 16-bit
+  
     setUint32(0x61746164); // "data" - chunk
     setUint32(length - pos - 4); // chunk length
-
-    for (let i = 0; i < buffer.numberOfChannels; i++) {
-      channels.push(buffer.getChannelData(i));
-    }
-
-    while (pos < length) {
-      for (let i = 0; i < numOfChan; i++) {
-        const sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
-        view.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true); // write 16-bit sample
+  
+    for (let i = 0; i < numOfChan; i++) {
+      let channelData = buffer.getChannelData(i);
+      for (let j = 0; j < channelData.length; j++) {
+        let val = channelData[j];
+        val = Math.max(-1, Math.min(1, val));
+        view.setInt16(pos, val < 0 ? val * 0x8000 : val * 0x7FFF, true);
         pos += 2;
       }
-      offset++;
     }
-
     return new Blob([bufferArray], { type: "audio/wav" });
-
-    function setUint16(data) {
-      view.setUint16(pos, data, true);
-      pos += 2;
-    }
-
-    function setUint32(data) {
-      view.setUint32(pos, data, true);
-      pos += 4;
-    }
   };
+  
 
   const pollAudioProcessingStatus = async (publicId) => {
     try {
