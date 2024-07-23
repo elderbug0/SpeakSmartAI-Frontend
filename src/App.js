@@ -9,13 +9,13 @@ import ResultsPage from './ResultsPage';
 function App() {
   const [file, setFile] = useState(null);
   const [audioResponse, setAudioResponse] = useState(null);
-  const [audioProcessing, setAudioProcessing] = useState(false);
   const [videoResponse, setVideoResponse] = useState(null);
+  const [gptResponse, setGptResponse] = useState(null);
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState('en');
   const [loadingStage, setLoadingStage] = useState(null);
-  const [gptResponse, setGptResponse] = useState(null);
   const dropRef = useRef(null);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
@@ -32,208 +32,57 @@ function App() {
     event.preventDefault();
   };
 
-  const extractAudioFromMov = (file) => {
-    return new Promise((resolve, reject) => {
-      const videoElement = document.createElement('video');
-      videoElement.src = URL.createObjectURL(file);
-      videoElement.style.display = 'none';
-      document.body.appendChild(videoElement);
-  
-      videoElement.onloadedmetadata = () => {
-        const mediaSource = videoElement.captureStream();
-        const audioTracks = mediaSource.getAudioTracks();
-  
-        if (audioTracks.length === 0) {
-          reject(new Error('No audio tracks found in the video file.'));
-          return;
-        }
-  
-        const audioStream = new MediaStream(audioTracks);
-        const recorder = new MediaRecorder(audioStream);
-        const chunks = [];
-  
-        recorder.ondataavailable = (event) => chunks.push(event.data);
-        recorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'audio/webm' });
-          resolve(blob);
-          document.body.removeChild(videoElement);
-        };
-  
-        videoElement.onplay = () => recorder.start();
-        videoElement.onended = () => recorder.stop();
-        
-        videoElement.play().catch(reject);
-      };
-  
-      videoElement.onerror = (error) => {
-        document.body.removeChild(videoElement);
-        reject(error);
-      };
-    });
-  };
-  
-
-  const extractAudioFromVideo = async (file) => {
-    return new Promise((resolve, reject) => {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const reader = new FileReader();
-
-      reader.onload = function () {
-        const arrayBuffer = reader.result;
-
-        audioContext.decodeAudioData(arrayBuffer).then((decodedAudioData) => {
-          const offlineAudioContext = new OfflineAudioContext(
-            decodedAudioData.numberOfChannels,
-            decodedAudioData.duration * decodedAudioData.sampleRate,
-            decodedAudioData.sampleRate
-          );
-          const soundSource = offlineAudioContext.createBufferSource();
-          soundSource.buffer = decodedAudioData;
-          soundSource.connect(offlineAudioContext.destination);
-          soundSource.start();
-
-          offlineAudioContext.startRendering().then((renderedBuffer) => {
-            const wavBlob = audioBufferToWav(renderedBuffer);
-            resolve(wavBlob);
-          }).catch(reject);
-        }).catch(reject);
-      };
-      reader.readAsArrayBuffer(file);
-    });
-  };
-
-  const audioBufferToWav = (buffer) => {
-    const numOfChan = buffer.numberOfChannels,
-      length = buffer.length * numOfChan * 2 + 44,
-      bufferArray = new ArrayBuffer(length),
-      view = new DataView(bufferArray),
-      channels = [],
-      sampleRate = buffer.sampleRate;
-
-    let offset = 0;
-    let pos = 0;
-
-    setUint32(0x46464952); // "RIFF"
-    setUint32(length - 8); // file length - 8
-    setUint32(0x45564157); // "WAVE"
-
-    setUint32(0x20746d66); // "fmt " chunk
-    setUint32(16); // length = 16
-    setUint16(1); // PCM (uncompressed)
-    setUint16(numOfChan);
-    setUint32(sampleRate);
-    setUint32(sampleRate * 2 * numOfChan); // avg. bytes/sec
-    setUint16(numOfChan * 2); // block-align
-    setUint16(16); // 16-bit (hardcoded in this demo)
-
-    setUint32(0x61746164); // "data" - chunk
-    setUint32(length - pos - 4); // chunk length
-
-    for (let i = 0; i < buffer.numberOfChannels; i++) {
-      channels.push(buffer.getChannelData(i));
-    }
-
-    while (pos < length) {
-      for (let i = 0; i < numOfChan; i++) {
-        const sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
-        view.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true); // write 16-bit sample
-        pos += 2;
-      }
-      offset++;
-    }
-
-    return new Blob([bufferArray], { type: "audio/wav" });
-
-    function setUint16(data) {
-      view.setUint16(pos, data, true);
-      pos += 2;
-    }
-
-    function setUint32(data) {
-      view.setUint32(pos, data, true);
-      pos += 4;
-    }
-  };
-
-  const pollAudioProcessingStatus = async (publicId) => {
-    try {
-      const response = await axios.get(`http://localhost:7000/api/v1/audio/status/${publicId}`);
-      if (response.data.status === 'processing') {
-        setTimeout(() => pollAudioProcessingStatus(publicId), 3000); // poll every 3 seconds
-      } else {
-        setAudioResponse(response.data);
-        setAudioProcessing(false);
-        analyzeTextWithGpt(response.data.results.openai.text);
-      }
-    } catch (error) {
-      setError('Error polling audio processing status');
-      setAudioProcessing(false);
-    }
-  };
-
-  const analyzeTextWithGpt = async (text) => {
-    try {
-      const response = await axios.post('http://localhost:7000/api/v1/audio/analyze-text', { text });
-      setGptResponse(response.data);
-    } catch (error) {
-      setError('Error analyzing text with GPT-3');
-    }
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
     setAudioResponse(null);
-    setVideoResponse(null);
     setGptResponse(null);
     setLoadingStage('uploading');
-    setAudioProcessing(true);
+
+    if (!file) {
+      setError('Please select a file to upload.');
+      setLoadingStage(null);
+      return;
+    }
 
     try {
-      let audioBlob;
-      if (file.type === 'video/quicktime') {
-        audioBlob = await extractAudioFromMov(file);
-      } else {
-        audioBlob = await extractAudioFromVideo(file);
-      }
-
-      const audioFormData = new FormData();
-      audioFormData.append('audio', audioBlob, 'audio.wav');
-      audioFormData.append('language', language);
-
       const videoFormData = new FormData();
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      axios.post('http://localhost:7000/api/v1/audio/uploadd', audioFormData, {
+      // Send video upload request independently
+      const videoUploadRequest = axios.post('http://localhost:5000/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then(audioUploadResponse => {
-        const publicId = audioUploadResponse.data.public_id;
-        pollAudioProcessingStatus(publicId);
-      }).catch(err => {
-        setError('Error uploading audio file');
-        setLoadingStage(null);
-        setAudioProcessing(false);
       });
 
-      axios.post('http://localhost:7000/api/v1/video/upload', videoFormData, {
+      // Send audio upload request
+      const audioUploadResponse = await axios.post('http://localhost:5000/api/v1/audio/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      }).then(videoUploadResponse => {
-        setVideoResponse(videoUploadResponse.data);
-        setLoadingStage(null);
-      }).catch(err => {
-        setError('Error uploading video file');
-        setLoadingStage(null);
       });
 
-    } catch (err) {
-      setError('Error processing file');
+      setAudioResponse(audioUploadResponse.data);
+
+      // Extract text from audio response
+      const text = audioUploadResponse.data.results.openai.text;
+
+      // Send analyze text request
+      const gptResponse = await axios.post('http://localhost:5000/api/v1/audio/analyze-text', { text, language });
+
+      setGptResponse(gptResponse.data.gpt_response);
+
+      // Await the video upload request to finish
+      const videoUploadResponse = await videoUploadRequest;
+
+      setVideoResponse(videoUploadResponse.data);
+
       setLoadingStage(null);
-      setAudioProcessing(false);
+    } catch (err) {
+      setError('Error uploading video and audio files');
+      setLoadingStage(null);
     }
   };
 
@@ -243,6 +92,10 @@ function App() {
 
   const handleSeeResults = () => {
     navigate('/results', { state: { audioResponse, videoResponse, gptResponse } });
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
   };
 
   return (
@@ -283,10 +136,10 @@ function App() {
                 <UploadIcon className="w-12 h-12 text-gray-400" />
                 <div className="text-center">
                   <p className="font-medium" style={{ color: '#3F3F3F', marginTop: '-25px' }}>
-                    Drag and drop your video here or <Button variant="link" onClick={() => document.getElementById('fileInput').click()}>click to select a file</Button>
+                    Drag and drop your video here or <Button variant="link" onClick={handleButtonClick}>click to select a file</Button>
                   </p>
                 </div>
-                <input id="fileInput" type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
+                <input id="fileInput" type="file" accept="video/*" onChange={handleFileChange} className="hidden" ref={fileInputRef} />
               </div>
               {file && (
                 <p className="text-center mt-2 text-green-500" style={{ marginTop: '-30px' }}>
@@ -313,39 +166,38 @@ function App() {
             </div>
           )}
           {error && <p className="text-red-500 mt-4">{error}</p>}
-          {(!audioProcessing && audioResponse && videoResponse) && (
+          {audioResponse && (
             <Button onClick={handleSeeResults} className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark mt-4">View Your Analysis</Button>
           )}
         </div>
         <div>
-  <h2 className="text-center mt-24 text-2xl font-bold" style={{ color: '#3F3F3F', fontSize: '30px', marginBottom: '50px' }}>How does it work?</h2>
-</div>
-<section className="w-full flex justify-center">
-  <div className="grid grid-cols-1 md:grid-cols-3 w-3/5 gap-10">
-    <div className="flex items-start text-left md:text-left w-full max-w-xs mb-4 md:mb-0">
-      <FaUpload className="w-16 h-16 mr-4 text-blue-500" />
-      <div>
-        <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Upload Your Video</h3>
-        <p style={{ color: '#747474', fontSize: '18px' }}>Record your speech on any topic and upload it to our platform.</p>
-      </div>
-    </div>
-    <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
-      <FaChartLine className="w-16 h-16 mr-4 text-blue-500" />
-      <div>
-        <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>AI Analysis</h3>
-        <p style={{ color: '#747474', fontSize: '18px' }}>Our AI analyzes your video to evaluate your speech and body language.</p>
-      </div>
-    </div>
-    <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
-      <FaComment className="w-16 h-16 mr-4 text-blue-500" />
-      <div>
-        <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Get Feedback</h3>
-        <p style={{ color: '#747474', fontSize: '18px' }}>Receive detailed feedback and tips to improve your performance.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
+          <h2 className="text-center mt-24 text-2xl font-bold" style={{ color: '#3F3F3F', fontSize: '30px', marginBottom: '50px' }}>How does it work?</h2>
+        </div>
+        <section className="w-full flex justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 w-3/5 gap-10">
+            <div className="flex items-start text-left md:text-left w-full max-w-xs mb-4 md:mb-0">
+              <FaUpload className="w-16 h-16 mr-4 text-blue-500" />
+              <div>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Upload Your Video</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>Record your speech on any topic and upload it to our platform.</p>
+              </div>
+            </div>
+            <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
+              <FaChartLine className="w-16 h-16 mr-4 text-blue-500" />
+              <div>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>AI Analysis</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>Our AI analyzes your video to evaluate your speech and body language.</p>
+              </div>
+            </div>
+            <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
+              <FaComment className="w-16 h-16 mr-4 text-blue-500" />
+              <div>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Get Feedback</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>Receive detailed feedback and tips to improve your performance.</p>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
