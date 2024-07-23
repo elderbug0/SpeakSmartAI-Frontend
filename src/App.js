@@ -36,44 +36,42 @@ function App() {
     return new Promise((resolve, reject) => {
       const videoElement = document.createElement('video');
       videoElement.src = URL.createObjectURL(file);
+      videoElement.style.display = 'none';
+      document.body.appendChild(videoElement);
   
-
       videoElement.onloadedmetadata = () => {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const mediaSource = audioContext.createMediaElementSource(videoElement);
-        const mediaStreamDestination = audioContext.createMediaStreamDestination();
-
-        mediaSource.connect(mediaStreamDestination);
-        mediaSource.connect(audioContext.destination);
-
-        const recorder = new MediaRecorder(mediaStreamDestination.stream);
-        const chunks = [];
-
-        recorder.ondataavailable = (e) => chunks.push(e.data);
-        recorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'audio/mp3' });
-          resolve(blob);
-        };
-
-        videoElement.onended = () => {
-          recorder.stop();
-        };
-
-        const playPromise = videoElement.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            recorder.start();
-          }).catch((error) => {
-            reject(error);
-          });
+        const mediaSource = videoElement.captureStream();
+        const audioTracks = mediaSource.getAudioTracks();
+  
+        if (audioTracks.length === 0) {
+          reject(new Error('No audio tracks found in the video file.'));
+          return;
         }
+  
+        const audioStream = new MediaStream(audioTracks);
+        const recorder = new MediaRecorder(audioStream);
+        const chunks = [];
+  
+        recorder.ondataavailable = (event) => chunks.push(event.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          resolve(blob);
+          document.body.removeChild(videoElement);
+        };
+  
+        videoElement.onplay = () => recorder.start();
+        videoElement.onended = () => recorder.stop();
+        
+        videoElement.play().catch(reject);
       };
-
+  
       videoElement.onerror = (error) => {
+        document.body.removeChild(videoElement);
         reject(error);
       };
     });
   };
+  
 
   const extractAudioFromVideo = async (file) => {
     return new Promise((resolve, reject) => {
@@ -159,13 +157,13 @@ function App() {
 
   const pollAudioProcessingStatus = async (publicId) => {
     try {
-      const response = await axios.get(`https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/status/${publicId}`);
+      const response = await axios.get(`http://localhost:7000/api/v1/audio/status/${publicId}`);
       if (response.data.status === 'processing') {
         setTimeout(() => pollAudioProcessingStatus(publicId), 3000); // poll every 3 seconds
       } else {
         setAudioResponse(response.data);
         setAudioProcessing(false);
-        analyzeTextWithGpt(response.data.results.amazon.text);
+        analyzeTextWithGpt(response.data.results.openai.text);
       }
     } catch (error) {
       setError('Error polling audio processing status');
@@ -175,7 +173,7 @@ function App() {
 
   const analyzeTextWithGpt = async (text) => {
     try {
-      const response = await axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/analyze-text', { text });
+      const response = await axios.post('http://localhost:7000/api/v1/audio/analyze-text', { text });
       setGptResponse(response.data);
     } catch (error) {
       setError('Error analyzing text with GPT-3');
@@ -207,7 +205,7 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/audio/uploadd', audioFormData, {
+      axios.post('http://localhost:7000/api/v1/audio/uploadd', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -220,7 +218,7 @@ function App() {
         setAudioProcessing(false);
       });
 
-      axios.post('https://node-ts-boilerplate-production-79e3.up.railway.app/api/v1/video/upload', videoFormData, {
+      axios.post('http://localhost:7000/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

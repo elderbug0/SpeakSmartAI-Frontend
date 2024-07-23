@@ -147,7 +147,7 @@ const ResultsPage = () => {
           {audioResponse && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold text-gray-800">Audio Analysis Result:</h3>
-              <pre className="bg-gray-100 p-4 rounded text-gray-800 pre-wrap">{audioResponse.results.amazon.text}</pre>
+              <pre className="bg-gray-100 p-4 rounded text-gray-800 pre-wrap">{audioResponse.results.openai.text}</pre>
               {gptResponse && (
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-800">GPT Analysis</h3>
