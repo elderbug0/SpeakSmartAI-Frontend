@@ -19,11 +19,13 @@ function App() {
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
+    console.log('handleFileChange event:', event);
     setFile(event.target.files[0]);
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
+    console.log('File dropped:', event.dataTransfer.files[0]);
     const droppedFile = event.dataTransfer.files[0];
     setFile(droppedFile);
   };
@@ -34,6 +36,7 @@ function App() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log('Form submitted');
     setError(null);
     setAudioResponse(null);
     setGptResponse(null);
@@ -50,51 +53,56 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      // Send video upload request independently
+      console.log('Sending video upload request');
       const videoUploadRequest = axios.post('http://localhost:5000/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      // Send audio upload request
+      console.log('Sending audio upload request');
       const audioUploadResponse = await axios.post('http://localhost:5000/api/v1/audio/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
+      console.log('Audio upload response:', audioUploadResponse.data);
       setAudioResponse(audioUploadResponse.data);
 
-      // Extract text from audio response
       const text = audioUploadResponse.data.results.openai.text;
+      console.log('Extracted text:', text);
 
-      // Send analyze text request
+      console.log('Sending analyze text request');
       const gptResponse = await axios.post('http://localhost:5000/api/v1/audio/analyze-text', { text, language });
 
+      console.log('GPT response:', gptResponse.data.gpt_response);
       setGptResponse(gptResponse.data.gpt_response);
 
-      // Await the video upload request to finish
       const videoUploadResponse = await videoUploadRequest;
-
+      console.log('Video upload response:', videoUploadResponse.data);
       setVideoResponse(videoUploadResponse.data);
 
       setLoadingStage(null);
     } catch (err) {
+      console.error('Error uploading video and audio files:', err);
       setError('Error uploading video and audio files');
       setLoadingStage(null);
     }
   };
 
   const handleLanguageChange = (event) => {
+    console.log('Language changed:', event.target.value);
     setLanguage(event.target.value);
   };
 
   const handleSeeResults = () => {
+    console.log('Navigating to results page');
     navigate('/results', { state: { audioResponse, videoResponse, gptResponse } });
   };
 
   const handleButtonClick = () => {
+    console.log('File input button clicked');
     fileInputRef.current.click();
   };
 
