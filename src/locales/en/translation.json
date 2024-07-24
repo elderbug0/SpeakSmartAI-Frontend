@@ -1,0 +1,24 @@
+
+{
+    "title": "Speak Smart AI",
+    "subtitle": "Master Public Speaking",
+    "description": "Unlock your potential with personalized feedback on your speech and body language",
+    "upload_instruction": "Upload Your Video for Analysis",
+    "upload_description": "Our AI will analyze your video to evaluate your speech and body language.",
+    "drag_and_drop": "Drag and drop your video here or",
+    "click_to_select": "click to select a file",
+    "file_uploaded": "File has been uploaded successfully.",
+    "language": "Language",
+    "upload_button": "Upload Your Video",
+    "uploading": "Uploading your files...",
+    "processing": "Processing your files...",
+    "view_analysis": "View Your Analysis",
+    "how_it_works": "How does it work?",
+    "step1_title": "Upload Your Video",
+    "step1_description": "Record your speech on any topic and upload it to our platform.",
+    "step2_title": "AI Analysis",
+    "step2_description": "Our AI analyzes your video to evaluate your speech and body language.",
+    "step3_title": "Get Feedback",
+    "step3_description": "Receive detailed feedback and tips to improve your performance."
+  }
+  

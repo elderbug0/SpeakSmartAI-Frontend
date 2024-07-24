@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useState, useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -5,8 +6,11 @@ import { FaUpload, FaChartLine, FaComment } from 'react-icons/fa';
 import { Button } from './components/ui/Button';
 import './styles/tailwind.css';
 import ResultsPage from './ResultsPage';
+import { useTranslation } from 'react-i18next';
+import i18n from './i18n';
 
 function App() {
+  const { t } = useTranslation();
   const [file, setFile] = useState(null);
   const [audioResponse, setAudioResponse] = useState(null);
   const [videoResponse, setVideoResponse] = useState(null);
@@ -43,7 +47,7 @@ function App() {
     setLoadingStage('uploading');
 
     if (!file) {
-      setError('Please select a file to upload.');
+      setError(t('error.no_file'));
       setLoadingStage(null);
       return;
     }
@@ -54,14 +58,14 @@ function App() {
       videoFormData.append('language', language);
 
       console.log('Sending video upload request');
-      const videoUploadRequest = axios.post('http://localhost:5000/api/v1/video/upload', videoFormData, {
+      const videoUploadRequest = axios.post('https://flask-backend-production-0786.up.railway.app/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
       console.log('Sending audio upload request');
-      const audioUploadResponse = await axios.post('http://localhost:5000/api/v1/audio/upload', videoFormData, {
+      const audioUploadResponse = await axios.post('https://flask-backend-production-0786.up.railway.app/api/v1/audio/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -74,7 +78,7 @@ function App() {
       console.log('Extracted text:', text);
 
       console.log('Sending analyze text request');
-      const gptResponse = await axios.post('http://localhost:5000/api/v1/audio/analyze-text', { text, language });
+      const gptResponse = await axios.post('https://flask-backend-production-0786.up.railway.app/api/v1/audio/analyze-text', { text, language });
 
       console.log('GPT response:', gptResponse.data.gpt_response);
       setGptResponse(gptResponse.data.gpt_response);
@@ -86,7 +90,7 @@ function App() {
       setLoadingStage(null);
     } catch (err) {
       console.error('Error uploading video and audio files:', err);
-      setError('Error uploading video and audio files');
+      setError(t('error.upload_error'));
       setLoadingStage(null);
     }
   };
@@ -94,6 +98,7 @@ function App() {
   const handleLanguageChange = (event) => {
     console.log('Language changed:', event.target.value);
     setLanguage(event.target.value);
+    i18n.changeLanguage(event.target.value);
   };
 
   const handleSeeResults = () => {
@@ -110,26 +115,30 @@ function App() {
     <div className="w-full min-h-screen bg-gray-100">
       <header className="w-full bg-gray-100 fixed top-0 left-0 right-0 z-10 shadow">
         <div className="w-full mx-auto py-4 px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F', marginLeft: '80px' }}>Speak Smart AI</h1>
+          <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F', marginLeft: '80px' }}>{t('title')}</h1>
+          <select value={language} onChange={handleLanguageChange} className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+          </select>
         </div>
       </header>
       <div className="mx-auto py-16 px-4 mt-16">
         <div className="text-center mb-8">
           <h2 className="text-5xl font-bold leading-tight" style={{ color: '#3F3F3F', marginTop: '-10px', marginBottom: '40px' }}>
-            <span>Speak Smart AI - </span><span style={{ color: '#126A9C' }}>Master</span>
+            <span>{t('title')} - </span><span style={{ color: '#126A9C' }}>{t('subtitle')}</span>
             <br />
-            <span className="block mt-2">Public Speaking</span>
+            <span className="block mt-2">{t('subtitle')}</span>
           </h2>
           <p className="text-lg font-thin" style={{ color: '#747474' }}>
-            Unlock your potential with personalized feedback on your speech and body language
+            {t('description')}
           </p>
         </div>
 
         <div className="bg-white rounded-3xl p-4 md:p-6 shadow-lg w-full max-w-md mx-auto">
           <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold" style={{ color: '#3F3F3F', marginBottom: '1px', fontSize: '19px' }}>Upload Your Video for Analysis</h2>
+            <h2 className="text-2xl font-bold" style={{ color: '#3F3F3F', marginBottom: '1px', fontSize: '19px' }}>{t('upload_instruction')}</h2>
             <p className="text-gray-600" style={{ color: '#747474', fontSize: '15px' }}>
-              Our AI will analyze your video to evaluate your speech and body language.
+              {t('upload_description')}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="grid gap-4">
@@ -144,29 +153,29 @@ function App() {
                 <UploadIcon className="w-12 h-12 text-gray-400" />
                 <div className="text-center">
                   <p className="font-medium" style={{ color: '#3F3F3F', marginTop: '-25px' }}>
-                    Drag and drop your video here or <Button variant="link" onClick={handleButtonClick}>click to select a file</Button>
+                    {t('drag_and_drop')} <Button variant="link" onClick={handleButtonClick}>{t('click_to_select')}</Button>
                   </p>
                 </div>
                 <input id="fileInput" type="file" accept="video/*" onChange={handleFileChange} className="hidden" ref={fileInputRef} />
               </div>
               {file && (
                 <p className="text-center mt-2 text-green-500" style={{ marginTop: '-30px' }}>
-                  File has been uploaded successfully.
+                  {t('file_uploaded')}
                 </p>
               )}
             </div>
             <div className="flex items-center justify-center">
-              <label htmlFor="language" className="mr-2 text-gray-700">Language:</label>
+              <label htmlFor="language" className="mr-2 text-gray-700">{t('language')}:</label>
               <select id="language" value={language} onChange={handleLanguageChange} className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md">
                 <option value="en">English</option>
-                <option value="ru">Russian</option>
+                <option value="ru">Русский</option>
               </select>
             </div>
-            <Button type="submit" className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark">Upload Your Video</Button>
+            <Button type="submit" className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark">{t('upload_button')}</Button>
           </form>
           {loadingStage && (
             <div className="flex justify-center mt-4">
-              <p style={{ color: '#3F3F3F' }}>{loadingStage === 'uploading' ? 'Uploading your files...' : 'Processing your files...'}</p>
+              <p style={{ color: '#3F3F3F' }}>{loadingStage === 'uploading' ? t('uploading') : t('processing')}</p>
               <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
@@ -175,33 +184,33 @@ function App() {
           )}
           {error && <p className="text-red-500 mt-4">{error}</p>}
           {audioResponse && (
-            <Button onClick={handleSeeResults} className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark mt-4">View Your Analysis</Button>
+            <Button onClick={handleSeeResults} className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark mt-4">{t('view_analysis')}</Button>
           )}
         </div>
         <div>
-          <h2 className="text-center mt-24 text-2xl font-bold" style={{ color: '#3F3F3F', fontSize: '30px', marginBottom: '50px' }}>How does it work?</h2>
+          <h2 className="text-center mt-24 text-2xl font-bold" style={{ color: '#3F3F3F', fontSize: '30px', marginBottom: '50px' }}>{t('how_it_works')}</h2>
         </div>
         <section className="w-full flex justify-center">
           <div className="grid grid-cols-1 md:grid-cols-3 w-3/5 gap-10">
             <div className="flex items-start text-left md:text-left w-full max-w-xs mb-4 md:mb-0">
               <FaUpload className="w-16 h-16 mr-4 text-blue-500" />
               <div>
-                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Upload Your Video</h3>
-                <p style={{ color: '#747474', fontSize: '18px' }}>Record your speech on any topic and upload it to our platform.</p>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>{t('step1_title')}</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>{t('step1_description')}</p>
               </div>
             </div>
             <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
               <FaChartLine className="w-16 h-16 mr-4 text-blue-500" />
               <div>
-                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>AI Analysis</h3>
-                <p style={{ color: '#747474', fontSize: '18px' }}>Our AI analyzes your video to evaluate your speech and body language.</p>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>{t('step2_title')}</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>{t('step2_description')}</p>
               </div>
             </div>
             <div className="flex items-start text-left md:text-left max-w-xs mx-auto mb-4 md:mb-0">
               <FaComment className="w-16 h-16 mr-4 text-blue-500" />
               <div>
-                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>Get Feedback</h3>
-                <p style={{ color: '#747474', fontSize: '18px' }}>Receive detailed feedback and tips to improve your performance.</p>
+                <h3 className="text-xl font-semibold" style={{ color: '#3F3F3F', marginBottom: '5px' }}>{t('step3_title')}</h3>
+                <p style={{ color: '#747474', fontSize: '18px' }}>{t('step3_description')}</p>
               </div>
             </div>
           </div>
