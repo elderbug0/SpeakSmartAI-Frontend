@@ -1,5 +1,4 @@
-// src/App.js
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaUpload, FaChartLine, FaComment } from 'react-icons/fa';
@@ -18,18 +17,31 @@ function App() {
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState('en');
   const [loadingStage, setLoadingStage] = useState(null);
+  const [status, setStatus] = useState('Uploading');
   const dropRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    let interval;
+    if (loadingStage) {
+      interval = setInterval(async () => {
+        const response = await axios.get('http://localhost:5000/api/v1/status');
+        setStatus(response.data.status);
+      }, 2000);
+    } else if (interval) {
+      clearInterval(interval);
+    }
+
+    return () => clearInterval(interval);
+  }, [loadingStage]);
+
   const handleFileChange = (event) => {
-    console.log('handleFileChange event:', event);
     setFile(event.target.files[0]);
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
-    console.log('File dropped:', event.dataTransfer.files[0]);
     const droppedFile = event.dataTransfer.files[0];
     setFile(droppedFile);
   };
@@ -40,11 +52,12 @@ function App() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Form submitted');
     setError(null);
     setAudioResponse(null);
+    setVideoResponse(null);
     setGptResponse(null);
     setLoadingStage('uploading');
+    setStatus('Uploading');
 
     if (!file) {
       setError(t('error.no_file'));
@@ -57,57 +70,44 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      console.log('Sending video upload request');
-      const videoUploadRequest = axios.post('https://flask-backend-production-0786.up.railway.app/api/v1/video/upload', videoFormData, {
+      const videoUploadRequest = axios.post('http://localhost:5000/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      console.log('Sending audio upload request');
-      const audioUploadResponse = await axios.post('https://flask-backend-production-0786.up.railway.app/api/v1/audio/upload', videoFormData, {
+      const audioUploadResponse = await axios.post('http://localhost:5000/api/v1/audio/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-
-      console.log('Audio upload response:', audioUploadResponse.data);
-      setAudioResponse(audioUploadResponse.data);
 
       const text = audioUploadResponse.data.results.openai.text;
-      console.log('Extracted text:', text);
+      setAudioResponse(audioUploadResponse.data);
 
-      console.log('Sending analyze text request');
-      const gptResponse = await axios.post('https://flask-backend-production-0786.up.railway.app/api/v1/audio/analyze-text', { text, language });
-
-      console.log('GPT response:', gptResponse.data.gpt_response);
+      const gptResponse = await axios.post('http://localhost:5000/api/v1/audio/analyze-text', { text, language });
       setGptResponse(gptResponse.data.gpt_response);
 
       const videoUploadResponse = await videoUploadRequest;
-      console.log('Video upload response:', videoUploadResponse.data);
       setVideoResponse(videoUploadResponse.data);
 
       setLoadingStage(null);
     } catch (err) {
-      console.error('Error uploading video and audio files:', err);
       setError(t('error.upload_error'));
       setLoadingStage(null);
     }
   };
 
   const handleLanguageChange = (event) => {
-    console.log('Language changed:', event.target.value);
     setLanguage(event.target.value);
     i18n.changeLanguage(event.target.value);
   };
 
   const handleSeeResults = () => {
-    console.log('Navigating to results page');
     navigate('/results', { state: { audioResponse, videoResponse, gptResponse } });
   };
 
   const handleButtonClick = () => {
-    console.log('File input button clicked');
     fileInputRef.current.click();
   };
 
@@ -175,17 +175,17 @@ function App() {
           </form>
           {loadingStage && (
             <div className="flex justify-center mt-4">
-              <p style={{ color: '#3F3F3F' }}>{loadingStage === 'uploading' ? t('uploading') : t('processing')}</p>
+              <p style={{ color: '#3F3F3F' }}>{status}</p>
               <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
               </svg>
             </div>
           )}
-          {error && <p className="text-red-500 mt-4">{error}</p>}
-          {audioResponse && (
+          {audioResponse && videoResponse && gptResponse && (
             <Button onClick={handleSeeResults} className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark mt-4">{t('view_analysis')}</Button>
           )}
+          {error && <p className="text-red-500 mt-4">{error}</p>}
         </div>
         <div>
           <h2 className="text-center mt-24 text-2xl font-bold" style={{ color: '#3F3F3F', fontSize: '30px', marginBottom: '50px' }}>{t('how_it_works')}</h2>
