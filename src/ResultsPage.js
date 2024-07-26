@@ -4,6 +4,7 @@ import Header from './components/Header';
 import AnalysisBlock from './AnalysisBlock';
 import OverallScore from './OverallScore';
 import './styles/tailwind.css';
+// import { parse } from 'path';
 
 const ResultsPage = () => {
   const location = useLocation();
@@ -39,17 +40,33 @@ const ResultsPage = () => {
       parsedGptData["Engagement"]?.score ?? 0,
     ] : [];
 
-    const videoScores = parsedVideoData?.details ? Object.keys(parsedVideoData.details).map(
-      (key) => parsedVideoData.summary[key] ?? 0
-    ) : [];
+    console.log('Parsed GPT Data:', parsedGptData);
+    console.log('GPT Scores:', gptScores);
 
-    const speechScore = calculateOverallScore(gptScores);
-    const bodyLanguageScore = calculateOverallScore(videoScores);
+    console.log(parsedVideoData)
+    // const videoScores = ""
+    const summary = JSON.parse(parsedVideoData.description).summary
+    console.log(summary)
+    
+    const videoScores = summary ? [
+      summary.BodyOrientation ?? 0,
+      summary.FacialExpressions ?? 0,
+      summary.GestureAnalysis ?? 0,
+      summary.NonVerbalCues ?? 0,
+      summary.PoseAnalysis ?? 0,
+      summary.PostureAnalysis ?? 0,
+      summary.ProximityAndSpaceUsage ?? 0,
+    ] : [];
+    console.log('Video Scores:', videoScores);
 
-    return { speechScore, bodyLanguageScore };
+    const combinedScores = [...gptScores, ...videoScores];
+
+    const overallScore = calculateOverallScore(combinedScores);
+
+    return { overallScore, speechScore: calculateOverallScore(gptScores), bodyLanguageScore: calculateOverallScore(videoScores) };
   };
 
-  const { speechScore, bodyLanguageScore } = calculateScores(gptResponse, videoResponse);
+  const { overallScore, speechScore, bodyLanguageScore } = calculateScores(gptResponse, videoResponse);
 
   const renderGptAnalysis = (gptData) => {
     const parsedData = parseData(gptData);
@@ -172,8 +189,7 @@ const ResultsPage = () => {
             <div className="mt-4">
               <h3 className="text-lg font-semibold text-gray-800">Your Result:</h3>
               <div className="flex flex-col items-center" style={{marginTop:'40px'}}>
-                <OverallScore score={speechScore} />
-                
+                <OverallScore score={overallScore} />
               </div>
               <pre className="bg-gray-100 p-6 rounded text-gray-800 pre-wrap w-full mt-8">{audioResponse.results.openai.text}</pre>
               {gptResponse && (
