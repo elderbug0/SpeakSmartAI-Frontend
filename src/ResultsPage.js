@@ -194,7 +194,7 @@ const ResultsPage = () => {
               <pre className="bg-gray-100 p-6 rounded text-gray-800 pre-wrap w-full mt-8">{audioResponse.results.openai.text}</pre>
               {gptResponse && (
                 <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-gray-800">GPT Analysis</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">Speech Analysis</h3>
                   {renderGptAnalysis(gptResponse)}
                 </div>
               )}
