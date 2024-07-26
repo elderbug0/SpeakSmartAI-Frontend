@@ -175,7 +175,7 @@ const ResultsPage = () => {
                 <OverallScore score={speechScore} />
                 
               </div>
-              <pre className="bg-gray-100 p-6 rounded text-gray-800 pre-wrap w-full mt-11">{audioResponse.results.openai.text}</pre>
+              <pre className="bg-gray-100 p-6 rounded text-gray-800 pre-wrap w-full mt-8">{audioResponse.results.openai.text}</pre>
               {gptResponse && (
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-800">GPT Analysis</h3>

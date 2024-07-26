@@ -70,13 +70,13 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      const videoUploadRequest = axios.post('https://flask-backend-production-7a59.up.railway.app/api/v1/video/upload', videoFormData, {
+      const videoUploadRequest = axios.post('http://localhost:5000/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      const audioUploadResponse = await axios.post('https://flask-backend-production-7a59.up.railway.app/api/v1/audio/upload', videoFormData, {
+      const audioUploadResponse = await axios.post('http://localhost:5000/api/v1/audio/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -85,7 +85,7 @@ function App() {
       const text = audioUploadResponse.data.results.openai.text;
       setAudioResponse(audioUploadResponse.data);
 
-      const gptResponse = await axios.post('https://flask-backend-production-7a59.up.railway.app/api/v1/audio/analyze-text', { text, language });
+      const gptResponse = await axios.post('http://localhost:5000/api/v1/audio/analyze-text', { text, language });
       setGptResponse(gptResponse.data.gpt_response);
 
       const videoUploadResponse = await videoUploadRequest;
