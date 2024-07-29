@@ -1,6 +1,9 @@
+// src/ResultsPage.js
+
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import AnalysisBlock from './AnalysisBlock';
 import OverallScore from './OverallScore';
 import './styles/tailwind.css';
@@ -39,11 +42,7 @@ const ResultsPage = () => {
       parsedGptData["Engagement"]?.score ?? parsedGptData["Вовлеченность"]?.score ?? 0,
     ] : [];
 
-    console.log('Parsed GPT Data:', parsedGptData);
-    console.log('GPT Scores:', gptScores);
-
     const summary = JSON.parse(parsedVideoData.description).summary;
-    console.log(summary);
 
     const videoScores = summary ? [
       summary['Body Orientation'] ?? summary['Ориентация Тела'] ?? 0,
@@ -54,8 +53,6 @@ const ResultsPage = () => {
       summary['Posture Analysis'] ?? summary['Анализ Позиции'] ?? 0,
       summary['Proximity And Space Usage'] ?? summary['Использование Пространства'] ?? 0,
     ] : [];
-
-    console.log('Video Scores:', videoScores);
 
     const combinedScores = [...gptScores, ...videoScores];
 
@@ -222,9 +219,9 @@ const ResultsPage = () => {
               {renderBodyLanguageAnalysis(videoResponse.description)}
             </div>
           )}
-
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

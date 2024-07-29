@@ -5,6 +5,8 @@ import { FaUpload, FaChartLine, FaComment } from 'react-icons/fa';
 import { Button } from './components/ui/Button';
 import './styles/tailwind.css';
 import ResultsPage from './ResultsPage';
+import Footer from './components/Footer';
+import ProgressBar from './components/ProgressBar';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
 
@@ -18,11 +20,31 @@ function App() {
   const [language, setLanguage] = useState('en');
   const [loadingStage, setLoadingStage] = useState(null);
   const [status, setStatus] = useState('Uploading');
+  const [progress, setProgress] = useState(0);
   const dropRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
- 
+  useEffect(() => {
+    if (loadingStage === 'uploading') {
+      const duration = 100; // 2.8 minutes in seconds
+      const interval = 1000; // interval in milliseconds (1 second)
+
+      const intervalId = setInterval(() => {
+        setProgress((prevProgress) => {
+          if (prevProgress >= 100) {
+            clearInterval(intervalId);
+            return 100;
+          }
+          return prevProgress + (100 / duration);
+        });
+      }, interval);
+
+      return () => clearInterval(intervalId);
+    } else {
+      setProgress(0);
+    }
+  }, [loadingStage]);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -115,7 +137,6 @@ function App() {
           <h2 className="text-5xl font-bold leading-tight" style={{ color: '#3F3F3F', marginTop: '-10px', marginBottom: '40px' }}>
             <span>{t('title')} - </span><span style={{ color: '#126A9C' }}>{t('subtitle')}</span>
             <br />
-
           </h2>
           <p className="text-lg font-thin" style={{ color: '#747474' }}>
             {t('description')}
@@ -162,12 +183,11 @@ function App() {
             <Button type="submit" className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark">{t('upload_button')}</Button>
           </form>
           {loadingStage && (
-            <div className="flex justify-center mt-4">
-              <p style={{ color: '#3F3F3F' }}>{status}</p>
-              <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-              </svg>
+            <div className="mt-4">
+              <ProgressBar progress={Math.floor(progress)} />
+              <div className="flex justify-center mt-2">
+                <p style={{ color: '#3F3F3F' }}>{status}</p>
+              </div>
             </div>
           )}
           {audioResponse && videoResponse && gptResponse && (
@@ -204,6 +224,7 @@ function App() {
           </div>
         </section>
       </div>
+      <Footer />
     </div>
   );
 }
