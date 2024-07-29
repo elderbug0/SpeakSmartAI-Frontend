@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-const OverallScore = ({ score }) => {
+const OverallScore = ({ score, language }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -30,10 +30,17 @@ const OverallScore = ({ score }) => {
   };
 
   const getFeedback = (score) => {
-    if (score <= 20) return 'This score is not that good. You should train more to improve your skills significantly.';
-    if (score <= 50) return 'This score is fair. You have some areas that need improvement. Keep working on your skills.';
-    if (score <= 80) return 'This score is good. You are doing well, but there is still room for improvement.';
-    return 'This score is excellent. Great job! You have demonstrated strong skills.';
+    if (language === 'ru') {
+      if (score <= 20) return 'Этот результат не очень хороший. Вам следует больше тренироваться, чтобы значительно улучшить свои навыки.';
+      if (score <= 50) return 'Этот результат справедливый. У вас есть некоторые области, которые нуждаются в улучшении. Продолжайте работать над своими навыками.';
+      if (score <= 80) return 'Этот результат хороший. Вы делаете успехи, но еще есть куда расти.';
+      return 'Этот результат отличный. Отличная работа! Вы продемонстрировали сильные навыки.';
+    } else {
+      if (score <= 20) return 'This score is not that good. You should train more to improve your skills significantly.';
+      if (score <= 50) return 'This score is fair. You have some areas that need improvement. Keep working on your skills.';
+      if (score <= 80) return 'This score is good. You are doing well, but there is still room for improvement.';
+      return 'This score is excellent. Great job! You have demonstrated strong skills.';
+    }
   };
 
   const color = getColor(score);
@@ -54,7 +61,7 @@ const OverallScore = ({ score }) => {
           })}
         />
       </div>
-      <div style={{marginTop:'-40px'}} className=" text-left">
+      <div style={{ marginTop: '-40px' }} className="text-left">
         <p className="text-black">{feedback}</p>
       </div>
     </div>

@@ -22,19 +22,7 @@ function App() {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let interval;
-    if (loadingStage) {
-      interval = setInterval(async () => {
-        const response = await axios.get('https://speaksmartai-xyz.azurewebsites.net/api/v1/status');
-        setStatus(response.data.status);
-      }, 2000);
-    } else if (interval) {
-      clearInterval(interval);
-    }
-
-    return () => clearInterval(interval);
-  }, [loadingStage]);
+ 
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -127,7 +115,7 @@ function App() {
           <h2 className="text-5xl font-bold leading-tight" style={{ color: '#3F3F3F', marginTop: '-10px', marginBottom: '40px' }}>
             <span>{t('title')} - </span><span style={{ color: '#126A9C' }}>{t('subtitle')}</span>
             <br />
-            <span className="block mt-2">{t('subtitle')}</span>
+
           </h2>
           <p className="text-lg font-thin" style={{ color: '#747474' }}>
             {t('description')}
