@@ -58,13 +58,13 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      const videoUploadRequest = axios.post('https://speaksmartai-xyz.azurewebsites.net/api/v1/video/upload', videoFormData, {
+      const videoUploadRequest = axios.post('https://speaksmart-ai.azurewebsites.net/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      const audioUploadResponse = await axios.post('https://speaksmartai-xyz.azurewebsites.net/api/v1/audio/upload', videoFormData, {
+      const audioUploadResponse = await axios.post('https://speaksmart-ai.azurewebsites.net/api/v1/audio/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -73,7 +73,7 @@ function App() {
       const text = audioUploadResponse.data.results.openai.text;
       setAudioResponse(audioUploadResponse.data);
 
-      const gptResponse = await axios.post('https://speaksmartai-xyz.azurewebsites.net/api/v1/audio/analyze-text', { text, language });
+      const gptResponse = await axios.post('https://speaksmart-ai.azurewebsites.net/api/v1/audio/analyze-text', { text, language });
       setGptResponse(gptResponse.data.gpt_response);
 
       const videoUploadResponse = await videoUploadRequest;
