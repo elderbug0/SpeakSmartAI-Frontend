@@ -10,7 +10,7 @@ const examplesEn = [
 
 const examplesRu = [
   { id: 'steve_jobs_ru', name: 'Стив Джобс', preview: 'Инновации отличают лидера от последователя...' },
-  { id: 'elon_musk_ru', name: 'Элон Маск', preview: 'Когда что-то важно, вы делаете это, даже если...' },
+  { id: 'elon_musk_ru', name: 'Илон Маск', preview: 'Когда что-то важно, вы делаете это, даже если...' },
   { id: 'mark_zukerberg_ru', name: 'Марк Цукерберг', preview: 'Самый большой риск - не рисковать...' }
 ];
 
