@@ -33,7 +33,7 @@ function App() {
 
   useEffect(() => {
     if (loadingStage === 'uploading') {
-      const duration = 100; // 2.8 minutes in seconds
+      const duration = 168; // 2.8 minutes in seconds
       const interval = 1000; // interval in milliseconds (1 second)
 
       const intervalId = setInterval(() => {
