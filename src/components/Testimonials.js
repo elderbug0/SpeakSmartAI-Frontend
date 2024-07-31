@@ -24,7 +24,7 @@ const Testimonials = () => {
   const { t } = useTranslation();
   
   return (
-    <section className=" mt-32 mx-8 sm:mx-20">
+    <section className=" mt-32 mx-8 sm:mx-2">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-800">{t('What other people say')}</h2>
       </div>
