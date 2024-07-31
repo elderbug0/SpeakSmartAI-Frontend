@@ -130,13 +130,14 @@ function App() {
   return (
     <div className="w-full min-h-screen bg-gray-100">
       <header className="w-full bg-gray-100 fixed top-0 left-0 right-0 z-10 shadow">
-        <div className="w-full mx-auto py-4 px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F', marginLeft: '80px' }}>{t('title')}</h1>
-          <select 
-            value={language} 
-            onChange={handleLanguageChange} 
+        <div className="w-full mx-auto py-4 px-4 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F' }}>
+            {t('title')}
+          </h1>
+          <select
+            value={language}
+            onChange={handleLanguageChange}
             className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md px-4 py-3 text-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            style={{ marginRight: '80px' }}
           >
             <option value="en">English</option>
             <option value="ru">Русский</option>
@@ -186,10 +187,10 @@ function App() {
             </div>
             <div className="flex items-center justify-center">
               <label htmlFor="language" className="mr-2 text-gray-700">{t('language')}:</label>
-              <select 
-                id="language" 
-                value={language} 
-                onChange={handleLanguageChange} 
+              <select
+                id="language"
+                value={language}
+                onChange={handleLanguageChange}
                 className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md px-4 py-3 text-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="en">English</option>
@@ -240,7 +241,7 @@ function App() {
             </div>
           </div>
         </section>
-        
+
         <Testimonials />
       </div>
       <Footer />
