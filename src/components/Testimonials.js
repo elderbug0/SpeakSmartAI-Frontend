@@ -25,11 +25,11 @@ const Testimonials = () => {
   
   return (
     <section className="bg-gray-100 relative mt-32 mx-8 sm:mx-20">
-      <div className="text-center mb-8 ">
+      <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-800">{t('What other people say')}</h2>
       </div>
-      <div className="flex justify-center overflow-hidden relative">
-      <div className="flex space-x-16 animate-loop-scroll my-4 mt-3">
+      <div className="flex flex-col sm:flex-row justify-center overflow-hidden relative">
+        <div className="flex sm:flex-row flex-col space-y-4 sm:space-y-0 sm:space-x-16 my-4 mt-3">
 
           {testimonials.map((testimonial, index) => (
             <div key={index} className="testimonial bg-white rounded-xl p-8 shadow-lg flex-shrink-0 w-80 border border-gray-200">
