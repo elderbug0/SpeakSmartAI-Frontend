@@ -1,0 +1,138 @@
+{
+  "audioResponse": {
+    "results": {
+      "openai": {
+        "text": "At Facebook, we believe that connecting the world is one of the most important missions of our time. Our goal is to give everyone a voice and to make the world more open and connected. We are constantly working on building new tools and improving our platform to help people connect, share, and build community. Thank you for being part of this journey with us."
+      }
+    }
+  },
+  "videoResponse": {
+    "description": {
+      "summary": {
+        "BodyOrientation": 9,
+        "FacialExpressions": 10,
+        "Gesture Analysis": 9,
+        "NonVerbalCues": 8,
+        "PoseAnalysis": 9,
+        "Posture Analysis": 9,
+        "ProximityAndSpaceUsage": 9
+      },
+      "details": {
+        "Posture Analysis": {
+          "Duration Of Postures": {
+            "standing": "The speaker stood for the majority of the speech, maintaining a confident and open stance.",
+            "sitting": "The speaker did not sit during the speech.",
+            "leaning": "The speaker occasionally leaned, which might have indicated a casual attitude."
+          },
+          "FrequencyAndTypesOfPostureChanges": {
+            "standingToLeaning": "The speaker occasionally transitioned from standing to leaning, which might have been slightly distracting.",
+            "leaningToStanding": "The speaker corrected their posture from leaning to standing several times, showing awareness of their stance."
+          },
+          "Stability And Balance": {
+            "stableDuration": "The speaker maintained stability for most of the speech, demonstrating confidence.",
+            "unstableDuration": "The speaker had brief moments of instability, indicating possible nervousness.",
+            "comment": "Overall, the speaker maintained good balance but had moments of instability."
+          }
+        },
+        "Gesture Analysis": {
+          "HandGestures": {
+            "openPalm": "The speaker frequently used open palm gestures, which helped in appearing open and honest.",
+            "pointing": "The speaker occasionally pointed, which might have been perceived as aggressive."
+          },
+          "ArmMovements": {
+            "range": "The arm movements were moderate in range, suitable for the speech context.",
+            "fluidity": "The speaker's arm movements were smooth and well-controlled, enhancing the speech delivery."
+          },
+          "HeadMovements": {
+            "nods": "The speaker frequently nodded, showing engagement with the audience.",
+            "shakes": "The speaker occasionally shook their head, appropriately emphasizing certain points."
+          }
+        },
+        "FacialExpressions": {
+          "EmotionsDetected": {
+            "happiness": "The speaker often appeared happy, making the speech more engaging.",
+            "sadness": "The speaker sometimes showed sadness, which might have affected the overall positive tone.",
+            "anger": "The speaker briefly displayed anger, which could have been off-putting to the audience."
+          },
+          "ExpressionChanges": "The speaker's facial expressions changed frequently, adding dynamism to the speech.",
+          "EyeContact": {
+            "duration": "The speaker maintained eye contact for a substantial part of the speech, helping to connect with the audience.",
+            "frequency": "The speaker frequently looked at the camera, ensuring engagement."
+          }
+        },
+        "BodyOrientation": {
+          "DirectionFacing": {
+            "front": "The speaker mostly faced the front, directly engaging the audience.",
+            "side": "The speaker occasionally faced the side, which might have reduced engagement at times."
+          },
+          "OrientationChanges": "The speaker frequently changed orientation, keeping the audience attentive."
+        },
+        "ProximityAndSpaceUsage": {
+          "PersonalSpaceUsage": {
+            "movingCloser": "The speaker occasionally moved closer to the camera, enhancing engagement.",
+            "movingFurther": "The speaker rarely moved further from the camera, maintaining a consistent engagement distance."
+          },
+          "SpaceUsageEffectiveness": "The speaker effectively used the space around them, making the speech more dynamic."
+        },
+        "PoseAnalysis": {
+          "PoseConfidence": {
+            "averageConfidence": "The speaker maintained high confidence in their poses throughout the speech."
+          },
+          "Symmetry": "The speaker's body posture and movements were highly symmetrical, which was visually pleasing.",
+          "PoseTransitions": "The speaker's pose transitions were smooth, enhancing the overall delivery."
+        },
+        "NonVerbalCues": {
+          "Microexpressions": {
+            "nervousness": "The speaker occasionally showed microexpressions of nervousness.",
+            "otherEmotions": "The speaker displayed various other emotions subtly through microexpressions."
+          },
+          "SmallMovements": {
+            "twitching": "The speaker rarely twitched, indicating good control over small movements.",
+            "fidgeting": "The speaker occasionally fidgeted, which might have indicated underlying nervousness."
+          }
+        }
+      }
+    }
+  },
+  "gptResponse": {
+    "Sentiment Analysis": {
+      "score": 9,
+      "overall_sentiment": "positive",
+      "comments": "Encouraging and highly motivational."
+    },
+    "Clarity and Coherence": {
+      "score": 9,
+      "clarity": "excellent",
+      "coherence": "excellent",
+      "comments": "Clear, step-by-step guidance, well-structured with smooth transitions."
+    },
+    "Tone Analysis": {
+      "score": 9,
+      "tone": "informative, inspirational",
+      "comments": "Perfectly matches the purpose of providing practical and inspirational advice."
+    },
+    "Language and Grammar": {
+      "score": 9,
+      "errors_found": [
+        "Incorrect punctuation in 'What if someone started their pitch with? I will put Google out of business.'",
+        "Run-on sentences.",
+        "Missing commas in compound sentences."
+      ],
+      "suggestions": [
+        "Correct punctuation: 'What if someone started their pitch with: I will put Google out of business?'",
+        "Split run-on sentences.",
+        "Add commas for better flow."
+      ],
+      "language_professionalism": "high",
+      "readability": "excellent"
+    },
+    "Engagement": {
+      "score": 9,
+      "engaging": "high",
+      "comments": "Highly informative and engaging, uses anecdotes effectively."
+    },
+    "Improved Text": {
+      "text": "At Facebook, we believe that connecting the world is one of the most important missions of our time. Our goal is to give everyone a voice and to make the world more open and connected. We are constantly working on building new tools and improving our platform to help people connect, share, and build community. Thank you for being part of this journey with us."
+    }
+  }
+}

@@ -9,6 +9,12 @@ import Footer from './components/Footer';
 import ProgressBar from './components/ProgressBar';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
+import Examples from './components/Examples';
+import Testimonials from './components/Testimonials';
+import ResultsExample from './ResultsExample';
+
+// Set the default language to Russian
+i18n.changeLanguage('ru');
 
 function App() {
   const { t } = useTranslation();
@@ -17,7 +23,7 @@ function App() {
   const [videoResponse, setVideoResponse] = useState(null);
   const [gptResponse, setGptResponse] = useState(null);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState('ru');
   const [loadingStage, setLoadingStage] = useState(null);
   const [status, setStatus] = useState('Uploading');
   const [progress, setProgress] = useState(0);
@@ -80,13 +86,13 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      const videoUploadRequest = axios.post('https://speaksmart-ai.azurewebsites.net/api/v1/video/upload', videoFormData, {
+      const videoUploadRequest = axios.post('https://speak-smartai.azurewebsites.net/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      const audioUploadResponse = await axios.post('https://speaksmart-ai.azurewebsites.net/api/v1/audio/upload', videoFormData, {
+      const audioUploadResponse = await axios.post('https://speak-smartai.azurewebsites.net/api/v1/audio/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -95,7 +101,7 @@ function App() {
       const text = audioUploadResponse.data.results.openai.text;
       setAudioResponse(audioUploadResponse.data);
 
-      const gptResponse = await axios.post('https://speaksmart-ai.azurewebsites.net/api/v1/audio/analyze-text', { text, language });
+      const gptResponse = await axios.post('https://speak-smartai.azurewebsites.net/api/v1/audio/analyze-text', { text, language });
       setGptResponse(gptResponse.data.gpt_response);
 
       const videoUploadResponse = await videoUploadRequest;
@@ -126,7 +132,12 @@ function App() {
       <header className="w-full bg-gray-100 fixed top-0 left-0 right-0 z-10 shadow">
         <div className="w-full mx-auto py-4 px-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F', marginLeft: '80px' }}>{t('title')}</h1>
-          <select value={language} onChange={handleLanguageChange} className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md">
+          <select 
+            value={language} 
+            onChange={handleLanguageChange} 
+            className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md px-4 py-3 text-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ marginRight: '80px' }}
+          >
             <option value="en">English</option>
             <option value="ru">Русский</option>
           </select>
@@ -175,12 +186,17 @@ function App() {
             </div>
             <div className="flex items-center justify-center">
               <label htmlFor="language" className="mr-2 text-gray-700">{t('language')}:</label>
-              <select id="language" value={language} onChange={handleLanguageChange} className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md">
+              <select 
+                id="language" 
+                value={language} 
+                onChange={handleLanguageChange} 
+                className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md px-4 py-3 text-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
                 <option value="en">English</option>
                 <option value="ru">Русский</option>
               </select>
             </div>
-            <Button type="submit" className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark">{t('upload_button')}</Button>
+            <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-full py-3 hover:from-blue-600 hover:to-green-600 shadow-lg text-lg font-bold">{t('upload_button')}</Button>
           </form>
           {loadingStage && (
             <div className="mt-4">
@@ -191,10 +207,11 @@ function App() {
             </div>
           )}
           {audioResponse && videoResponse && gptResponse && (
-            <Button onClick={handleSeeResults} className="w-full bg-custom-blue text-white rounded-full py-2 hover:bg-custom-blue-dark mt-4">{t('view_analysis')}</Button>
+            <Button onClick={handleSeeResults} className="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-full py-3 hover:from-blue-600 hover:to-green-600 shadow-lg text-lg font-bold mt-4">{t('view_analysis')}</Button>
           )}
           {error && <p className="text-red-500 mt-4">{error}</p>}
         </div>
+        <Examples language={language} />
         <div>
           <h2 className="text-center mt-24 text-2xl font-bold" style={{ color: '#3F3F3F', fontSize: '30px', marginBottom: '50px' }}>{t('how_it_works')}</h2>
         </div>
@@ -223,6 +240,8 @@ function App() {
             </div>
           </div>
         </section>
+        
+        <Testimonials />
       </div>
       <Footer />
     </div>
@@ -256,6 +275,7 @@ function AppWrapper() {
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/results" element={<ResultsPage />} />
+        <Route path="/results_example/:exampleId" element={<ResultsExample />} />
       </Routes>
     </Router>
   );

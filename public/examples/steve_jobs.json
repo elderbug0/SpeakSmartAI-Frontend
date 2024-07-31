@@ -1,0 +1,138 @@
+{
+  "audioResponse": {
+    "results": {
+      "openai": {
+        "text": "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work. And the only way to do great work is to love what you do. If you haven't found it yet, keep looking. Don't settle. As with all matters of the heart, you'll know when you find it. Keep looking, don't settle. Stay hungry, stay foolish. Thank you."
+      }
+    }
+  },
+  "videoResponse": {
+    "description": {
+      "summary": {
+        "BodyOrientation": 9,
+        "FacialExpressions": 10,
+        "Gesture Analysis": 9,
+        "NonVerbalCues": 9,
+        "PoseAnalysis": 10,
+        "Posture Analysis": 9,
+        "ProximityAndSpaceUsage": 10
+      },
+      "details": {
+        "Posture Analysis": {
+          "Duration Of Postures": {
+            "standing": "The speaker stood for the majority of the speech, maintaining a confident and open stance.",
+            "sitting": "The speaker did not sit during the speech.",
+            "leaning": "The speaker occasionally leaned forward, which added emphasis to key points."
+          },
+          "FrequencyAndTypesOfPostureChanges": {
+            "standingToLeaning": "The speaker occasionally transitioned from standing to leaning forward to emphasize important points.",
+            "leaningToStanding": "The speaker smoothly transitioned back to standing, maintaining engagement."
+          },
+          "Stability And Balance": {
+            "stableDuration": "The speaker maintained stability throughout the speech, demonstrating confidence.",
+            "unstableDuration": "The speaker showed no moments of instability.",
+            "comment": "Overall, the speaker exhibited excellent balance and stability."
+          }
+        },
+        "Gesture Analysis": {
+          "HandGestures": {
+            "openPalm": "The speaker frequently used open palm gestures, conveying openness and sincerity.",
+            "pointing": "The speaker rarely pointed, maintaining a friendly demeanor."
+          },
+          "ArmMovements": {
+            "range": "The arm movements were dynamic and varied, effectively capturing the audience's attention.",
+            "fluidity": "The speaker's arm movements were fluid and natural, enhancing the speech delivery."
+          },
+          "HeadMovements": {
+            "nods": "The speaker frequently nodded to emphasize key points and engage with the audience.",
+            "shakes": "The speaker occasionally shook their head to underscore important points."
+          }
+        },
+        "FacialExpressions": {
+          "EmotionsDetected": {
+            "happiness": "The speaker often smiled, creating a positive and engaging atmosphere.",
+            "sadness": "The speaker did not display sadness.",
+            "anger": "The speaker did not display anger, maintaining a positive tone throughout."
+          },
+          "ExpressionChanges": "The speaker's facial expressions were dynamic and varied, effectively conveying a range of emotions.",
+          "EyeContact": {
+            "duration": "The speaker maintained eye contact for the majority of the speech, fostering a strong connection with the audience.",
+            "frequency": "The speaker frequently looked directly at the camera, ensuring continuous engagement."
+          }
+        },
+        "BodyOrientation": {
+          "DirectionFacing": {
+            "front": "The speaker predominantly faced the front, maintaining direct engagement with the audience.",
+            "side": "The speaker occasionally faced the side to include different parts of the audience."
+          },
+          "OrientationChanges": "The speaker smoothly changed orientation, keeping the audience attentive and engaged."
+        },
+        "ProximityAndSpaceUsage": {
+          "PersonalSpaceUsage": {
+            "movingCloser": "The speaker occasionally moved closer to the audience, enhancing the sense of connection.",
+            "movingFurther": "The speaker maintained a consistent distance, ensuring effective engagement."
+          },
+          "SpaceUsageEffectiveness": "The speaker made excellent use of the available space, contributing to a dynamic and engaging presentation."
+        },
+        "PoseAnalysis": {
+          "PoseConfidence": {
+            "averageConfidence": "The speaker exhibited high confidence in their poses throughout the speech."
+          },
+          "Symmetry": "The speaker's body posture and movements were highly symmetrical, contributing to a visually pleasing presentation.",
+          "PoseTransitions": "The speaker's transitions between poses were smooth and natural, enhancing the overall delivery."
+        },
+        "NonVerbalCues": {
+          "Microexpressions": {
+            "nervousness": "The speaker occasionally showed microexpressions of excitement and passion.",
+            "otherEmotions": "The speaker subtly conveyed various emotions through microexpressions, adding depth to the speech."
+          },
+          "SmallMovements": {
+            "twitching": "The speaker rarely exhibited twitching, indicating good control over small movements.",
+            "fidgeting": "The speaker occasionally fidgeted, suggesting underlying passion rather than nervousness."
+          }
+        }
+      }
+    }
+  },
+  "gptResponse": {
+    "Sentiment Analysis": {
+      "score": 9,
+      "overall_sentiment": "inspirational",
+      "comments": "Highly motivational and encouraging, perfect for inspiring the audience."
+    },
+    "Clarity and Coherence": {
+      "score": 10,
+      "clarity": "excellent",
+      "coherence": "excellent",
+      "comments": "Clear, well-structured, and coherent, with seamless transitions."
+    },
+    "Tone Analysis": {
+      "score": 10,
+      "tone": "inspirational, motivational",
+      "comments": "Perfectly aligns with the goal of inspiring and motivating the audience."
+    },
+    "Language and Grammar": {
+      "score": 9,
+      "errors_found": [
+        "Incorrect punctuation in 'What if someone started their pitch with? I will put Google out of business.'",
+        "Run-on sentences.",
+        "Missing commas in compound sentences."
+      ],
+      "suggestions": [
+        "Correct punctuation: 'What if someone started their pitch with: I will put Google out of business?'",
+        "Split run-on sentences.",
+        "Add commas for better flow."
+      ],
+      "language_professionalism": "high",
+      "readability": "excellent"
+    },
+    "Engagement": {
+      "score": 10,
+      "engaging": "very high",
+      "comments": "Highly engaging, with effective use of anecdotes and personal stories."
+    },
+    "Improved Text": {
+      "text": "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work. And the only way to do great work is to love what you do. If you haven't found it yet, keep looking. Don't settle. As with all matters of the heart, you'll know when you find it. Keep looking, don't settle. Stay hungry, stay foolish. Thank you."
+    }
+  }
+}

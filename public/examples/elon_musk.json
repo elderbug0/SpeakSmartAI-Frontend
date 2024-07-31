@@ -1,0 +1,138 @@
+{
+  "audioResponse": {
+    "results": {
+      "openai": {
+        "text": "When something is important enough, you do it even if the odds are not in your favor. At SpaceX and Tesla, our mission is to accelerate the world's transition to sustainable energy and make space travel accessible to all. It's about pushing the boundaries of what's possible and inspiring others to do the same. Thank you for supporting us on this incredible journey."
+      }
+    }
+  },
+  "videoResponse": {
+    "description": {
+      "summary": {
+        "BodyOrientation": 9,
+        "FacialExpressions": 9,
+        "Gesture Analysis": 8,
+        "NonVerbalCues": 8,
+        "PoseAnalysis": 9,
+        "Posture Analysis": 9,
+        "ProximityAndSpaceUsage": 9
+      },
+      "details": {
+        "Posture Analysis": {
+          "Duration Of Postures": {
+            "standing": "The speaker stood for the entirety of the speech, exuding confidence and stability.",
+            "sitting": "The speaker did not sit during the speech.",
+            "leaning": "The speaker maintained an upright posture without leaning."
+          },
+          "FrequencyAndTypesOfPostureChanges": {
+            "standingToLeaning": "The speaker did not transition from standing to leaning.",
+            "leaningToStanding": "The speaker maintained a consistent standing posture."
+          },
+          "Stability And Balance": {
+            "stableDuration": "The speaker demonstrated stability throughout the speech, indicating confidence.",
+            "unstableDuration": "There were no moments of instability.",
+            "comment": "Overall, the speaker exhibited excellent balance and stability."
+          }
+        },
+        "Gesture Analysis": {
+          "HandGestures": {
+            "openPalm": "The speaker frequently used open palm gestures, conveying openness and honesty.",
+            "pointing": "The speaker occasionally pointed for emphasis, which was effective and not perceived as aggressive."
+          },
+          "ArmMovements": {
+            "range": "The arm movements were extensive and dynamic, capturing the audience's attention.",
+            "fluidity": "The speaker's arm movements were fluid and well-coordinated, enhancing the speech delivery."
+          },
+          "HeadMovements": {
+            "nods": "The speaker frequently nodded to emphasize key points, showing engagement with the audience.",
+            "shakes": "The speaker occasionally shook their head to underscore important points."
+          }
+        },
+        "FacialExpressions": {
+          "EmotionsDetected": {
+            "happiness": "The speaker often smiled, creating a positive and engaging atmosphere.",
+            "sadness": "The speaker did not display sadness.",
+            "anger": "The speaker briefly showed determination, which was interpreted positively."
+          },
+          "ExpressionChanges": "The speaker's facial expressions were dynamic, effectively conveying a range of emotions.",
+          "EyeContact": {
+            "duration": "The speaker maintained eye contact for the majority of the speech, fostering a connection with the audience.",
+            "frequency": "The speaker frequently looked directly at the camera, ensuring continuous engagement."
+          }
+        },
+        "BodyOrientation": {
+          "DirectionFacing": {
+            "front": "The speaker predominantly faced the front, maintaining direct engagement with the audience.",
+            "side": "The speaker occasionally faced the side, adding variety to the presentation."
+          },
+          "OrientationChanges": "The speaker smoothly changed orientation, keeping the audience attentive."
+        },
+        "ProximityAndSpaceUsage": {
+          "PersonalSpaceUsage": {
+            "movingCloser": "The speaker occasionally moved closer to the camera, enhancing the sense of connection.",
+            "movingFurther": "The speaker maintained a consistent distance, ensuring effective engagement."
+          },
+          "SpaceUsageEffectiveness": "The speaker made effective use of the available space, contributing to a dynamic presentation."
+        },
+        "PoseAnalysis": {
+          "PoseConfidence": {
+            "averageConfidence": "The speaker exhibited high confidence in their poses throughout the speech."
+          },
+          "Symmetry": "The speaker's body posture and movements were symmetrical, contributing to a visually pleasing presentation.",
+          "PoseTransitions": "The speaker's transitions between poses were smooth and natural, enhancing the overall delivery."
+        },
+        "NonVerbalCues": {
+          "Microexpressions": {
+            "nervousness": "The speaker occasionally showed microexpressions of determination.",
+            "otherEmotions": "The speaker subtly conveyed various emotions through microexpressions, adding depth to the speech."
+          },
+          "SmallMovements": {
+            "twitching": "The speaker rarely exhibited twitching, indicating good control over small movements.",
+            "fidgeting": "The speaker occasionally fidgeted, suggesting underlying determination rather than nervousness."
+          }
+        }
+      }
+    }
+  },
+  "gptResponse": {
+    "Sentiment Analysis": {
+      "score": 9,
+      "overall_sentiment": "inspirational",
+      "comments": "Highly motivational and encouraging."
+    },
+    "Clarity and Coherence": {
+      "score": 9,
+      "clarity": "excellent",
+      "coherence": "excellent",
+      "comments": "Clear, step-by-step guidance, well-structured with seamless transitions."
+    },
+    "Tone Analysis": {
+      "score": 9,
+      "tone": "informative, inspirational",
+      "comments": "Perfectly aligns with the goal of inspiring and informing the audience."
+    },
+    "Language and Grammar": {
+      "score": 9,
+      "errors_found": [
+        "Incorrect punctuation in 'What if someone started their pitch with? I will put Google out of business.'",
+        "Run-on sentences.",
+        "Missing commas in compound sentences."
+      ],
+      "suggestions": [
+        "Correct punctuation: 'What if someone started their pitch with: I will put Google out of business?'",
+        "Split run-on sentences.",
+        "Add commas for better flow."
+      ],
+      "language_professionalism": "high",
+      "readability": "excellent"
+    },
+    "Engagement": {
+      "score": 9,
+      "engaging": "high",
+      "comments": "Highly engaging, with effective use of anecdotes and examples."
+    },
+    "Improved Text": {
+      "text": "When something is important enough, you do it even if the odds are not in your favor. At SpaceX and Tesla, our mission is to accelerate the world's transition to sustainable energy and make space travel accessible to all. It's about pushing the boundaries of what's possible and inspiring others to do the same. Thank you for supporting us on this incredible journey."
+    }
+  }
+}

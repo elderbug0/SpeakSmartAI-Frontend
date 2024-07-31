@@ -1,23 +1,42 @@
-// src/ResultsPage.js
-
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import AnalysisBlock from './AnalysisBlock';
 import OverallScore from './OverallScore';
 import './styles/tailwind.css';
 
-const ResultsPage = () => {
-  const location = useLocation();
-  const { audioResponse, videoResponse, gptResponse } = location.state || {};
+function ResultsExample() {
+  const { exampleId } = useParams();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await fetch(`${process.env.PUBLIC_URL}/examples/${exampleId}.json`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [exampleId]);
 
   const parseData = (data) => {
     if (typeof data === 'object') {
-      return data; // Already an object, no need to parse
+      return data;
     }
     try {
-      return JSON.parse(data); // Try to parse as JSON
+      return JSON.parse(data);
     } catch (error) {
       console.error('Error parsing data:', error);
       return null;
@@ -42,16 +61,16 @@ const ResultsPage = () => {
       parsedGptData["Engagement"]?.score ?? parsedGptData["Вовлеченность"]?.score ?? 0,
     ] : [];
 
-    const summary = JSON.parse(parsedVideoData.description).summary;
+    const summary = parsedVideoData?.description?.summary;
 
     const videoScores = summary ? [
-      summary['Body Orientation'] ?? summary['Ориентация Тела'] ?? 0,
-      summary['Facial Expressions'] ?? summary['Выражения Лица'] ?? 0,
+      summary['BodyOrientation'] ?? summary['Ориентация Тела'] ?? 0,
+      summary['FacialExpressions'] ?? summary['Выражения Лица'] ?? 0,
       summary['Gesture Analysis'] ?? summary['Анализ Жестов'] ?? 0,
-      summary['NonVerbal Cues'] ?? summary['Невербальные Сигналы'] ?? 0,
-      summary['Pose Analysis'] ?? summary['Анализ Позы'] ?? 0,
+      summary['NonVerbalCues'] ?? summary['Невербальные Сигналы'] ?? 0,
+      summary['PoseAnalysis'] ?? summary['Анализ Позы'] ?? 0,
       summary['Posture Analysis'] ?? summary['Анализ Позиции'] ?? 0,
-      summary['Proximity And Space Usage'] ?? summary['Использование Пространства'] ?? 0,
+      summary['ProximityAndSpaceUsage'] ?? summary['Использование Пространства'] ?? 0,
     ] : [];
 
     const combinedScores = [...gptScores, ...videoScores];
@@ -61,7 +80,19 @@ const ResultsPage = () => {
     return { overallScore, speechScore: calculateOverallScore(gptScores), bodyLanguageScore: calculateOverallScore(videoScores) };
   };
 
-  const { overallScore, speechScore, bodyLanguageScore } = calculateScores(gptResponse, videoResponse);
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error loading data: {error}</p>;
+  }
+
+  if (!data) {
+    return <p>No data found for this example.</p>;
+  }
+
+  const { overallScore, speechScore, bodyLanguageScore } = calculateScores(data.gptResponse, data.videoResponse);
 
   const renderGptAnalysis = (gptData) => {
     const parsedData = parseData(gptData);
@@ -149,8 +180,6 @@ const ResultsPage = () => {
       </div>
     );
   };
-  
-
 
   const renderBodyLanguageAnalysis = (videoData) => {
     const parsedData = parseData(videoData);
@@ -200,7 +229,7 @@ const ResultsPage = () => {
     return translations[key] || key;
   };
 
-  const isRussian = gptResponse && parseData(gptResponse)["Анализ настроений"];
+  const isRussian = data.gptResponse && parseData(data.gptResponse)["Анализ настроений"];
 
   return (
     <div className="w-full min-h-screen bg-gray-100">
@@ -217,26 +246,26 @@ const ResultsPage = () => {
         </div>
 
         <div className="bg-white rounded-3xl p-6 shadow-lg w-full">
-          {audioResponse && (
+          {data.audioResponse && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold text-gray-800">{isRussian ? 'Ваш результат:' : 'Your Result:'}</h3>
               <div className="flex flex-col items-center" style={{marginTop:'40px'}}>
                 <OverallScore score={overallScore} language={isRussian ? 'ru' : 'en'} />
               </div>
-              <pre className="bg-gray-100 p-6 rounded text-gray-800 pre-wrap w-full mt-8">{audioResponse.results.openai.text}</pre>
-              {gptResponse && (
+              <pre className="bg-gray-100 p-6 rounded text-gray-800 pre-wrap w-full mt-8">{data.audioResponse.results.openai.text}</pre>
+              {data.gptResponse && (
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-800">{isRussian ? 'Анализ речи' : 'Speech Analysis'}</h3>
-                  {renderGptAnalysis(gptResponse)}
+                  {renderGptAnalysis(data.gptResponse)}
                 </div>
               )}
             </div>
           )}
 
-          {videoResponse && (
+          {data.videoResponse && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold text-gray-800">{isRussian ? 'Анализ языка тела:' : 'Body Language Analysis:'}</h3>
-              {renderBodyLanguageAnalysis(videoResponse.description)}
+              {renderBodyLanguageAnalysis(data.videoResponse.description)}
             </div>
           )}
         </div>
@@ -244,6 +273,6 @@ const ResultsPage = () => {
       <Footer />
     </div>
   );
-};
+}
 
-export default ResultsPage;
+export default ResultsExample;
