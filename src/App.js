@@ -66,6 +66,64 @@ function App() {
     event.preventDefault();
   };
 
+  const processAndUploadVideo = async (file) => {
+    return new Promise((resolve, reject) => {
+      const videoUrl = URL.createObjectURL(file);
+
+      const videoElement = document.createElement('video');
+      videoElement.src = videoUrl;
+      videoElement.playbackRate = 8.0; // Speed up the video
+      videoElement.muted = true; // Mute the video
+
+      videoElement.onloadedmetadata = async () => {
+        const reducedWidth = videoElement.videoWidth / 2;  // Reduce the resolution to half
+        const reducedHeight = videoElement.videoHeight / 2; // Reduce the resolution to half
+
+        const canvasElement = document.createElement('canvas');
+        canvasElement.width = reducedWidth;
+        canvasElement.height = reducedHeight;
+        const context = canvasElement.getContext('2d');
+
+        const stream = canvasElement.captureStream(30); // Capture at 30 FPS
+        const mediaRecorder = new MediaRecorder(stream, {
+          mimeType: 'video/webm; codecs=vp9',
+          videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
+        });
+
+        const chunks = [];
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            chunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const processedVideo = new File([blob], 'processed-video.webm', { type: 'video/webm' });
+          resolve(processedVideo);
+        };
+
+        mediaRecorder.start();
+        videoElement.play();
+
+        const drawCanvasFrame = () => {
+          context.drawImage(videoElement, 0, 0, reducedWidth, reducedHeight);
+          if (!videoElement.paused && !videoElement.ended) {
+            requestAnimationFrame(drawCanvasFrame);
+          } else {
+            mediaRecorder.stop();
+          }
+        };
+
+        drawCanvasFrame();
+      };
+
+      videoElement.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
@@ -82,17 +140,22 @@ function App() {
     }
 
     try {
-      const videoFormData = new FormData();
-      videoFormData.append('video', file);
-      videoFormData.append('language', language);
+      const processedVideo = await processAndUploadVideo(file);
 
-      const videoUploadRequest = axios.post('https://speaksmart2.azurewebsites.net/api/v1/video/upload', videoFormData, {
+      const videoFormData1 = new FormData();
+      const videoFormData2 = new FormData();
+      videoFormData1.append('video', processedVideo);
+      videoFormData1.append('language', language);
+      videoFormData2.append('video', file);
+      videoFormData2.append('language', language);
+
+      const videoUploadRequest = axios.post('https://speaksmart2.azurewebsites.net/api/v1/video/upload', videoFormData1, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData, {
+      const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData2, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -129,24 +192,24 @@ function App() {
 
   return (
     <div className="w-full min-h-screen bg-gray-100">
-<header className="w-full bg-gray-100 fixed top-0 left-0 right-0 z-10 shadow">
-  <div className="w-full mx-auto py-4 px-4 flex justify-between items-center">
-    <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F' }}>
-      {t('title')}
-    </h1>
-    <div className="flex items-center">
-      <select
-        value={language}
-        onChange={handleLanguageChange}
-        className="bg-blue-500 text-white font-bold border border-blue-700 rounded-md px-4 py-3 text-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        style={{ minWidth: '150px' }}
-      >
-        <option value="en">English</option>
-        <option value="ru">Русский</option>
-      </select>
-    </div>
-  </div>
-</header>
+      <header className="w-full bg-gray-100 fixed top-0 left-0 right-0 z-10 shadow">
+        <div className="w-full mx-auto py-4 px-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F' }}>
+            {t('title')}
+          </h1>
+          <div className="flex items-center">
+            <select
+              value={language}
+              onChange={handleLanguageChange}
+              className="bg-blue-500 text-white font-bold border border-blue-700 rounded-md px-4 py-3 text-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ minWidth: '150px' }}
+            >
+              <option value="en">English</option>
+              <option value="ru">Русский</option>
+            </select>
+          </div>
+        </div>
+      </header>
 
 
       <div className="mx-auto py-16 px-4 mt-16">
