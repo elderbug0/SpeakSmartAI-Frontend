@@ -86,7 +86,7 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      const videoUploadRequest = axios.post('http://speaksmart2.azurewebsites.net/api/v1/video/upload', videoFormData, {
+      const videoUploadRequest = axios.post('https://speaksmart2.azurewebsites.net/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
