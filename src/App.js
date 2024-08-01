@@ -86,7 +86,7 @@ function App() {
       videoFormData.append('video', file);
       videoFormData.append('language', language);
 
-      const videoUploadRequest = axios.post('https://speaksmart2.azurewebsites.net/api/v1/video/upload', videoFormData, {
+      const videoUploadRequest = axios.post('http://speaksmart2.azurewebsites.net/api/v1/video/upload', videoFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -129,21 +129,26 @@ function App() {
 
   return (
     <div className="w-full min-h-screen bg-gray-100">
-      <header className="w-full bg-gray-100 fixed top-0 left-0 right-0 z-10 shadow">
-        <div className="w-full mx-auto py-4 px-4 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F' }}>
-            {t('title')}
-          </h1>
-          <select
-            value={language}
-            onChange={handleLanguageChange}
-            className="bg-gray-100 border border-gray-300 text-gray-700 rounded-md px-4 py-3 text-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="en">English</option>
-            <option value="ru">Русский</option>
-          </select>
-        </div>
-      </header>
+<header className="w-full bg-gray-100 fixed top-0 left-0 right-0 z-10 shadow">
+  <div className="w-full mx-auto py-4 px-4 flex justify-between items-center">
+    <h1 className="text-2xl font-bold text-gray-800" style={{ color: '#3F3F3F' }}>
+      {t('title')}
+    </h1>
+    <div className="flex items-center">
+      <select
+        value={language}
+        onChange={handleLanguageChange}
+        className="bg-blue-500 text-white font-bold border border-blue-700 rounded-md px-4 py-3 text-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        style={{ minWidth: '150px' }}
+      >
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+
       <div className="mx-auto py-16 px-4 mt-16">
         <div className="text-center mb-8">
           <h2 className="text-5xl font-bold leading-tight" style={{ color: '#3F3F3F', marginTop: '-10px', marginBottom: '40px' }}>
