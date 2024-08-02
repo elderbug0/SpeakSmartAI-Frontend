@@ -129,3 +129,6 @@ html, body {
   display: grid;
   gap: 16px;
 }
+.hidden-video {
+  display: none;
+}
