@@ -65,29 +65,31 @@ function App() {
   const handleDragOver = (event) => {
     event.preventDefault();
   };
-
   const processAndUploadVideo = async (file) => {
     return new Promise((resolve, reject) => {
       const videoUrl = URL.createObjectURL(file);
   
       const videoElement = document.createElement('video');
       videoElement.src = videoUrl;
-      videoElement.muted = true; // Keep this to ensure no audio plays
-      videoElement.preload = 'metadata';
+      videoElement.playbackRate = 8.0; // Speed up the video
+      videoElement.muted = true; // Mute the video
+      videoElement.style.display = 'none'; // Hide the video element
+  
+      document.body.appendChild(videoElement); // Append to the DOM to load metadata
   
       videoElement.onloadedmetadata = async () => {
-        const reducedWidth = videoElement.videoWidth / 2;
-        const reducedHeight = videoElement.videoHeight / 2;
+        const reducedWidth = videoElement.videoWidth / 2;  // Reduce the resolution to half
+        const reducedHeight = videoElement.videoHeight / 2; // Reduce the resolution to half
   
         const canvasElement = document.createElement('canvas');
         canvasElement.width = reducedWidth;
         canvasElement.height = reducedHeight;
         const context = canvasElement.getContext('2d');
   
-        const stream = canvasElement.captureStream(30);
+        const stream = canvasElement.captureStream(30); // Capture at 30 FPS
         const mediaRecorder = new MediaRecorder(stream, {
-          mimeType: 'video/mp4',
-          videoBitsPerSecond: 1000000
+          mimeType: 'video/webm; codecs=vp9',
+          videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
         });
   
         const chunks = [];
@@ -98,33 +100,30 @@ function App() {
         };
   
         mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'video/mp4' });
-          const processedVideo = new File([blob], 'processed-video.mp4', { type: 'video/mp4' });
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const processedVideo = new File([blob], 'processed-video.webm', { type: 'video/webm' });
           resolve(processedVideo);
+          document.body.removeChild(videoElement); // Remove the video element after processing
         };
   
         mediaRecorder.start();
+        videoElement.play();
   
-        const processFrame = async (time) => {
-          if (time > videoElement.duration * 1000) {
-            mediaRecorder.stop();
-            return;
-          }
-  
-          videoElement.currentTime = time / 1000;
-          await new Promise(resolve => {
-            videoElement.onseeked = resolve;
-          });
-  
+        const drawCanvasFrame = () => {
           context.drawImage(videoElement, 0, 0, reducedWidth, reducedHeight);
-          requestAnimationFrame(() => processFrame(time + (1000 / 30) * 8)); // Simulate 8x speed
+          if (!videoElement.paused && !videoElement.ended) {
+            requestAnimationFrame(drawCanvasFrame);
+          } else {
+            mediaRecorder.stop();
+          }
         };
   
-        processFrame(0);
+        drawCanvasFrame();
       };
   
       videoElement.onerror = (error) => {
         reject(error);
+        document.body.removeChild(videoElement); // Remove the video element on error
       };
     });
   };
