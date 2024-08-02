@@ -74,6 +74,7 @@ function App() {
       videoElement.src = videoUrl;
       videoElement.playbackRate = 8.0; // Speed up the video
       videoElement.muted = true; // Mute the video
+      videoElement.style.display = 'none'
 
       videoElement.onloadedmetadata = async () => {
         const reducedWidth = videoElement.videoWidth / 2;  // Reduce the resolution to half
