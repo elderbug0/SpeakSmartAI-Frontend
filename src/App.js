@@ -149,20 +149,17 @@ function App() {
       videoFormData2.append('video', file);
       videoFormData2.append('language', language);
 
-
-      
-      const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData2, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
       const videoUploadRequest = axios.post('https://speaksmart2.azurewebsites.net/api/v1/video/upload', videoFormData1, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
+      const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData2, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
       const text = audioUploadResponse.data.results.openai.text;
       setAudioResponse(audioUploadResponse.data);
