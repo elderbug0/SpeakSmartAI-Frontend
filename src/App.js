@@ -105,7 +105,7 @@ function App() {
         };
 
         mediaRecorder.start();
-
+        videoElement.play();
 
         const drawCanvasFrame = () => {
           context.drawImage(videoElement, 0, 0, reducedWidth, reducedHeight);
