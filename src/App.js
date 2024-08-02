@@ -75,9 +75,6 @@ function App() {
       videoElement.playbackRate = 8.0; // Speed up the video
       videoElement.muted = true; // Mute the video
 
-      // Add the hidden-video class to hide the video element
-      videoElement.className = 'hidden-video';
-
       videoElement.onloadedmetadata = async () => {
         const reducedWidth = videoElement.videoWidth / 2;  // Reduce the resolution to half
         const reducedHeight = videoElement.videoHeight / 2; // Reduce the resolution to half
@@ -102,7 +99,7 @@ function App() {
 
         mediaRecorder.onstop = () => {
           const blob = new Blob(chunks, { type: 'video/mp4' });
-          const processedVideo = new File([blob], 'processed-video.webm', { type: 'video/mp4' });
+          const processedVideo = new File([blob], 'processed-video.mp4', { type: 'video/mp4' });
           resolve(processedVideo);
         };
 
