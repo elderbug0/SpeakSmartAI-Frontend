@@ -79,34 +79,34 @@ function App() {
       videoElement.onloadedmetadata = async () => {
         const reducedWidth = videoElement.videoWidth / 2;  // Reduce the resolution to half
         const reducedHeight = videoElement.videoHeight / 2; // Reduce the resolution to half
-
+        videoElement.style.display = 'none';
         const canvasElement = document.createElement('canvas');
         canvasElement.width = reducedWidth;
         canvasElement.height = reducedHeight;
         const context = canvasElement.getContext('2d');
-
+        videoElement.style.display = 'none';
         const stream = canvasElement.captureStream(30); // Capture at 30 FPS
         const mediaRecorder = new MediaRecorder(stream, {
           mimeType: 'video/mp4',
           videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
         });
-
+        videoElement.style.display = 'none';
         const chunks = [];
         mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
             chunks.push(event.data);
           }
         };
-
+        videoElement.style.display = 'none';
         mediaRecorder.onstop = () => {
           const blob = new Blob(chunks, { type: 'video/mp4' });
           const processedVideo = new File([blob], 'processed-video.mp4', { type: 'video/mp4' });
           resolve(processedVideo);
         };
-
+        videoElement.style.display = 'none';
         mediaRecorder.start();
         videoElement.play();
-
+        videoElement.style.display = 'none';
         const drawCanvasFrame = () => {
           context.drawImage(videoElement, 0, 0, reducedWidth, reducedHeight);
           if (!videoElement.paused && !videoElement.ended) {
@@ -115,7 +115,7 @@ function App() {
             mediaRecorder.stop();
           }
         };
-
+        videoElement.style.display = 'none';
         drawCanvasFrame();
       };
 
