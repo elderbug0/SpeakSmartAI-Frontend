@@ -66,7 +66,6 @@ function App() {
     event.preventDefault();
   };
 
-
   const processAndUploadVideo = async (file) => {
     return new Promise((resolve, reject) => {
       const videoUrl = URL.createObjectURL(file);
@@ -129,7 +128,80 @@ function App() {
       };
     });
   };
-  
+
+  const extractAudio = async (file) => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const reader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      reader.onload = async (e) => {
+        const arrayBuffer = e.target.result;
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        
+        // Convert AudioBuffer to WAV
+        const wavBuffer = audioBufferToWav(audioBuffer);
+        const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+        const audioFile = new File([wavBlob], 'extracted-audio.wav', { type: 'audio/wav' });
+        resolve(audioFile);
+      };
+
+      reader.onerror = (error) => reject(error);
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  // Helper function to convert AudioBuffer to WAV
+  function audioBufferToWav(buffer) {
+    const numOfChan = buffer.numberOfChannels;
+    const length = buffer.length * numOfChan * 2 + 44;
+    const out = new ArrayBuffer(length);
+    const view = new DataView(out);
+    const channels = [];
+    let sample;
+    let offset = 0;
+    let pos = 0;
+
+    // write WAVE header
+    setUint32(0x46464952);
+    setUint32(length - 8);
+    setUint32(0x45564157);
+    setUint32(0x20746d66);
+    setUint32(16);
+    setUint16(1);
+    setUint16(numOfChan);
+    setUint32(buffer.sampleRate);
+    setUint32(buffer.sampleRate * 2 * numOfChan);
+    setUint16(numOfChan * 2);
+    setUint16(16);
+    setUint32(0x61746164);
+    setUint32(length - pos - 4);
+
+    for (let i = 0; i < buffer.numberOfChannels; i++)
+      channels.push(buffer.getChannelData(i));
+
+    while (pos < length) {
+      for (let i = 0; i < numOfChan; i++) {
+        sample = Math.max(-1, Math.min(1, channels[i][offset]));
+        sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+        view.setInt16(pos, sample, true);
+        pos += 2;
+      }
+      offset++;
+    }
+
+    return out;
+
+    function setUint16(data) {
+      view.setUint16(pos, data, true);
+      pos += 2;
+    }
+
+    function setUint32(data) {
+      view.setUint32(pos, data, true);
+      pos += 4;
+    }
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
@@ -147,6 +219,7 @@ function App() {
 
     try {
       const processedVideo = await processAndUploadVideo(file);
+      const extractedAudio = await extractAudio(file);
 
       const videoFormData1 = new FormData();
       const videoFormData2 = new FormData();
@@ -163,7 +236,11 @@ function App() {
 
       await new Promise(resolve => setTimeout(resolve, 150));
 
-      const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData2, {
+      const audioFormData = new FormData();
+      audioFormData.append('audio', extractedAudio);
+      audioFormData.append('language', language);
+
+      const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', audioFormData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -218,7 +295,6 @@ function App() {
           </div>
         </div>
       </header>
-
 
       <div className="mx-auto py-16 px-4 mt-16">
         <div className="text-center mb-8">
