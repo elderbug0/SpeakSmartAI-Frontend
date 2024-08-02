@@ -74,7 +74,10 @@ function App() {
       videoElement.src = videoUrl;
       videoElement.playbackRate = 8.0; // Speed up the video
       videoElement.muted = true; // Mute the video
-      videoElement.style.display = 'none'
+
+      // Append video element to the hidden container
+      const hiddenContainer = document.getElementById('hidden-video-container');
+      hiddenContainer.appendChild(videoElement);
 
       videoElement.onloadedmetadata = async () => {
         const reducedWidth = videoElement.videoWidth / 2;  // Reduce the resolution to half
@@ -212,7 +215,6 @@ function App() {
         </div>
       </header>
 
-
       <div className="mx-auto py-16 px-4 mt-16">
         <div className="text-center mb-8">
           <h2 className="text-5xl font-bold leading-tight" style={{ color: '#3F3F3F', marginTop: '-10px', marginBottom: '40px' }}>
@@ -314,6 +316,7 @@ function App() {
         <Testimonials />
       </div>
       <Footer />
+      <div id="hidden-video-container" className="hidden"></div>
     </div>
   );
 }
