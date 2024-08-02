@@ -1,6 +1,7 @@
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Backend is on https://github.com/elderbug0/backend_speaksmartai 
 
 ## Available Scripts
 
