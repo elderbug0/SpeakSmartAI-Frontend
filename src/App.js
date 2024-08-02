@@ -140,8 +140,8 @@ function App() {
         
         // Convert AudioBuffer to WAV
         const wavBuffer = audioBufferToWav(audioBuffer);
-        const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
-        const audioFile = new File([wavBlob], 'extracted-audio.wav', { type: 'audio/wav' });
+        const wavBlob = new Blob([wavBuffer], { type: 'audio/mp3' });
+        const audioFile = new File([wavBlob], 'extracted-audio.mp3', { type: 'audio/mp3' });
         resolve(audioFile);
       };
 
