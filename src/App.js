@@ -86,13 +86,28 @@ function App() {
   
         const stream = canvasElement.captureStream(30); // Capture at 30 FPS
   
-        // Check if 'video/webm; codecs=vp9' is supported, otherwise fallback to 'video/mp4'
-        const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') ? 'video/webm; codecs=vp9' : 'video/mp4';
+        let options;
+        if (MediaRecorder.isTypeSupported('video/mp4')) {
+          options = {
+            mimeType: 'video/mp4',
+            videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
+          };
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+          options = {
+            mimeType: 'video/webm;codecs=vp9',
+            videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
+          };
+        } else if (MediaRecorder.isTypeSupported('video/webm')) {
+          options = {
+            mimeType: 'video/webm',
+            videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
+          };
+        } else {
+          reject(new Error('No supported video format found'));
+          return;
+        }
   
-        const mediaRecorder = new MediaRecorder(stream, {
-          mimeType: mimeType,
-          videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
-        });
+        const mediaRecorder = new MediaRecorder(stream, options);
   
         const chunks = [];
         mediaRecorder.ondataavailable = (event) => {
@@ -102,8 +117,9 @@ function App() {
         };
   
         mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: mimeType });
-          const processedVideo = new File([blob], `processed-video.${mimeType.split('/')[1]}`, { type: mimeType });
+          const blob = new Blob(chunks, { type: options.mimeType });
+          const fileExtension = options.mimeType.split('/')[1].split(';')[0];
+          const processedVideo = new File([blob], `processed-video.${fileExtension}`, { type: options.mimeType });
           resolve(processedVideo);
         };
   
@@ -127,7 +143,6 @@ function App() {
       };
     });
   };
-  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
