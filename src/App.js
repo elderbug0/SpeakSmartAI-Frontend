@@ -65,50 +65,47 @@ function App() {
   const handleDragOver = (event) => {
     event.preventDefault();
   };
+
   const processAndUploadVideo = async (file) => {
     return new Promise((resolve, reject) => {
       const videoUrl = URL.createObjectURL(file);
-  
+
       const videoElement = document.createElement('video');
       videoElement.src = videoUrl;
       videoElement.playbackRate = 8.0; // Speed up the video
       videoElement.muted = true; // Mute the video
-  
-      const videoContainer = document.getElementById('video-container');
-      videoContainer.appendChild(videoElement);
-  
+
       videoElement.onloadedmetadata = async () => {
         const reducedWidth = videoElement.videoWidth / 2;  // Reduce the resolution to half
         const reducedHeight = videoElement.videoHeight / 2; // Reduce the resolution to half
-  
+
         const canvasElement = document.createElement('canvas');
         canvasElement.width = reducedWidth;
         canvasElement.height = reducedHeight;
         const context = canvasElement.getContext('2d');
-  
+
         const stream = canvasElement.captureStream(30); // Capture at 30 FPS
         const mediaRecorder = new MediaRecorder(stream, {
           mimeType: 'video/mp4',
           videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
         });
-  
+
         const chunks = [];
         mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
             chunks.push(event.data);
           }
         };
-  
+
         mediaRecorder.onstop = () => {
           const blob = new Blob(chunks, { type: 'video/mp4' });
           const processedVideo = new File([blob], 'processed-video.mp4', { type: 'video/mp4' });
-          videoContainer.removeChild(videoElement);
           resolve(processedVideo);
         };
-  
+
         mediaRecorder.start();
         videoElement.play();
-  
+
         const drawCanvasFrame = () => {
           context.drawImage(videoElement, 0, 0, reducedWidth, reducedHeight);
           if (!videoElement.paused && !videoElement.ended) {
@@ -117,16 +114,15 @@ function App() {
             mediaRecorder.stop();
           }
         };
-  
+
         drawCanvasFrame();
       };
-  
+
       videoElement.onerror = (error) => {
         reject(error);
       };
     });
   };
-  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -153,20 +149,17 @@ function App() {
       videoFormData2.append('video', file);
       videoFormData2.append('language', language);
 
-
-      const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData2, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
       const videoUploadRequest = axios.post('https://speaksmart2.azurewebsites.net/api/v1/video/upload', videoFormData1, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-
+      const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData2, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
       const text = audioUploadResponse.data.results.openai.text;
       setAudioResponse(audioUploadResponse.data);
