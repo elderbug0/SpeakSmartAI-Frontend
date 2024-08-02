@@ -65,7 +65,6 @@ function App() {
   const handleDragOver = (event) => {
     event.preventDefault();
   };
-
   const processAndUploadVideo = async (file) => {
     return new Promise((resolve, reject) => {
       const videoUrl = URL.createObjectURL(file);
@@ -76,8 +75,8 @@ function App() {
       videoElement.muted = true; // Mute the video
   
       videoElement.onloadedmetadata = async () => {
-        const reducedWidth = videoElement.videoWidth / 2;  // Reduce the resolution to half
-        const reducedHeight = videoElement.videoHeight / 2; // Reduce the resolution to half
+        const reducedWidth = videoElement.videoWidth / 2;
+        const reducedHeight = videoElement.videoHeight / 2;
   
         const canvasElement = document.createElement('canvas');
         canvasElement.width = reducedWidth;
@@ -95,12 +94,12 @@ function App() {
         } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
           options = {
             mimeType: 'video/webm;codecs=vp9',
-            videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
+            videoBitsPerSecond: 1000000
           };
         } else if (MediaRecorder.isTypeSupported('video/webm')) {
           options = {
             mimeType: 'video/webm',
-            videoBitsPerSecond: 1000000 // Set bitrate to 1Mbps
+            videoBitsPerSecond: 1000000
           };
         } else {
           reject(new Error('No supported video format found'));
