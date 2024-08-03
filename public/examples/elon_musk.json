@@ -18,6 +18,9 @@
         "ProximityAndSpaceUsage": 9
       },
       "details": {
+
+
+
         "Posture Analysis": {
           "Duration Of Postures": {
             "standing": "The speaker stood for the entirety of the speech, exuding confidence and stability.",
@@ -95,6 +98,10 @@
     }
   },
   "gptResponse": {
+
+    "links":{
+      "link": "https://youtu.be/tShavGuo0_E?si=UyNNZ2RkdG5zKGhz"
+    },
     "Sentiment Analysis": {
       "score": 9,
       "overall_sentiment": "inspirational",

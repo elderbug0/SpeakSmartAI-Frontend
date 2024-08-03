@@ -95,6 +95,10 @@
       }
     },
     "gptResponse": {
+
+      "links":{
+        "link": "https://youtu.be/tShavGuo0_E?si=UyNNZ2RkdG5zKGhz"
+      },
       "Анализ настроений": {
         "score":8,
         "общий настрой": "позитивный",

@@ -7,17 +7,44 @@ import Footer from './components/Footer';
 import AnalysisBlock from './AnalysisBlock';
 import OverallScore from './OverallScore';
 import './styles/tailwind.css';
+import LeaderboardSection from './components/LeaderboardSection';
+
+const RecommendedVideo = ({ link, language }) => {
+  return (
+    <div className="mt-8 p-6 bg-blue-50 rounded-lg shadow-md">
+      <h3 className="text-xl font-semibold text-blue-800 mb-2">
+        {language === 'ru' ? 'Рекомендованное видео для улучшения навыков:' : 'Recommended video to improve your skills:'}
+      </h3>
+      <p className="text-gray-700 mb-4">
+        {language === 'ru' 
+          ? 'Мы подобрали для вас видео, которое поможет улучшить ваши навыки публичных выступлений.' 
+          : 'We ve found a video that can help you improve your public speaking skills.'}
+      </p>
+      <a 
+        href={link} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
+      >
+        {language === 'ru' ? 'Смотреть видео' : 'Watch Video'}
+      </a>
+    </div>
+  );
+};
 
 const ResultsPage = () => {
+  
   const location = useLocation();
   const { audioResponse, videoResponse, gptResponse } = location.state || {};
 
   const parseData = (data) => {
     if (typeof data === 'object') {
-      return data; // Already an object, no need to parse
+      return data;
     }
     try {
-      return JSON.parse(data); // Try to parse as JSON
+      // Remove any newline characters and extra spaces
+      const cleanedData = data.replace(/\n/g, '').replace(/\s+/g, ' ').trim();
+      return JSON.parse(cleanedData);
     } catch (error) {
       console.error('Error parsing data:', error);
       return null;
@@ -151,37 +178,41 @@ const ResultsPage = () => {
   };
   
 
-
   const renderBodyLanguageAnalysis = (videoData) => {
     const parsedData = parseData(videoData);
     if (!parsedData) return null;
-
+  
+    // Extract the link
+    const recommendedLink = parsedData.details?.links?.link;
+  
     return (
       <div className="mt-4">
         {parsedData.details && Object.keys(parsedData.details).map((key) => (
-          <AnalysisBlock
-            key={key}
-            title={key.replace(/([A-Z])/g, ' $1').trim()}
-            score={parsedData.summary[key] ?? parsedData.summary[translateKey(key)] ?? 0}
-            content={
-              <div>
-                {parsedData.details[key] && Object.keys(parsedData.details[key]).map((detailKey) => (
-                  <div key={detailKey} className="mb-2">
-                    <p className="font-semibold">{detailKey.replace(/([A-Z])/g, ' $1').trim()}</p>
-                    {typeof parsedData.details[key][detailKey] === 'object' ? (
-                      <div className="ml-4">
-                        {Object.keys(parsedData.details[key][detailKey]).map((subKey) => (
-                          <p key={subKey}>{`${subKey.replace(/([A-Z])/g, ' $1').trim()}: ${parsedData.details[key][detailKey][subKey]}`}</p>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="ml-4">{parsedData.details[key][detailKey]}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            }
-          />
+          key !== 'links' && (
+            <AnalysisBlock
+              key={key}
+              title={key.replace(/([A-Z])/g, ' $1').trim()}
+              score={parsedData.summary[key] ?? parsedData.summary[translateKey(key)] ?? 0}
+              content={
+                <div>
+                  {parsedData.details[key] && Object.keys(parsedData.details[key]).map((detailKey) => (
+                    <div key={detailKey} className="mb-2">
+                      <p className="font-semibold">{detailKey.replace(/([A-Z])/g, ' $1').trim()}</p>
+                      {typeof parsedData.details[key][detailKey] === 'object' ? (
+                        <div className="ml-4">
+                          {Object.keys(parsedData.details[key][detailKey]).map((subKey) => (
+                            <p key={subKey}>{`${subKey.replace(/([A-Z])/g, ' $1').trim()}: ${parsedData.details[key][detailKey][subKey]}`}</p>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="ml-4">{parsedData.details[key][detailKey]}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              }
+            />
+          )
         ))}
       </div>
     );
@@ -220,10 +251,23 @@ const ResultsPage = () => {
           {audioResponse && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold text-gray-800">{isRussian ? 'Ваш результат:' : 'Your Result:'}</h3>
-              <div className="flex flex-col items-center" style={{marginTop:'40px'}}>
-                <OverallScore score={overallScore} language={isRussian ? 'ru' : 'en'} />
+              <div className="flex flex-col md:flex-row items-center justify-center gap-8" style={{marginTop:'40px'}}>
+                <div className="w-full md:w-1/2 lg:w-1/3">
+                  <OverallScore score={overallScore} language={isRussian ? 'ru' : 'en'} />
+                </div>
+                <div className="w-full md:w-1/2 lg:w-1/3">
+                  <LeaderboardSection score={overallScore} language={isRussian ? 'ru' : 'en'} />
+                </div>
               </div>
               <pre className="bg-gray-100 p-6 rounded text-gray-800 pre-wrap w-full mt-8">{audioResponse.results.openai.text}</pre>
+
+              { JSON.parse(gptResponse).links && (
+                <RecommendedVideo 
+                  link={JSON.parse(gptResponse).links.link} 
+                  language={isRussian ? 'ru' : 'en'}
+                />
+              )}
+
               {gptResponse && (
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-800">{isRussian ? 'Анализ речи' : 'Speech Analysis'}</h3>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaUpload, FaChartLine, FaComment } from 'react-icons/fa';
 import { Button } from './components/ui/Button';
@@ -12,6 +12,8 @@ import i18n from './i18n';
 import Examples from './components/Examples';
 import Testimonials from './components/Testimonials';
 import ResultsExample from './ResultsExample';
+
+
 
 // Set the default language to Russian
 i18n.changeLanguage('ru');
@@ -161,7 +163,7 @@ function App() {
         }
       });
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData2, {
         headers: {
@@ -173,6 +175,8 @@ function App() {
       setAudioResponse(audioUploadResponse.data);
 
       const gptResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/analyze-text', { text, language });
+
+      console.log(gptResponse)
       setGptResponse(gptResponse.data.gpt_response);
 
       const videoUploadResponse = await videoUploadRequest;
@@ -218,7 +222,6 @@ function App() {
           </div>
         </div>
       </header>
-
 
       <div className="mx-auto py-16 px-4 mt-16">
         <div className="text-center mb-8">
