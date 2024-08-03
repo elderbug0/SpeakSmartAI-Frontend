@@ -163,7 +163,7 @@ function App() {
         }
       });
 
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const audioUploadResponse = await axios.post('https://speaksmart2.azurewebsites.net/api/v1/audio/upload', videoFormData2, {
         headers: {
