@@ -7,9 +7,7 @@ import OverallScore from './OverallScore';
 import './styles/tailwind.css';
 import LeaderboardSection from './components/LeaderboardSection';
 
-// New component for the recommended video link
 const RecommendedVideo = ({ link, language }) => {
-  // Ensure the link starts with 'http://' or 'https://'
   const completeLink = link.startsWith('http://') || link.startsWith('https://') ? link : `https://${link}`;
 
   return (
@@ -33,7 +31,6 @@ const RecommendedVideo = ({ link, language }) => {
     </div>
   );
 };
-
 
 function ResultsExample() {
   const { exampleId } = useParams();
@@ -200,7 +197,6 @@ function ResultsExample() {
     const parsedData = parseData(videoData);
     if (!parsedData) return null;
 
-    // Extract the link
     const recommendedLink = parsedData.details.links?.link;
 
     return (
@@ -270,20 +266,20 @@ function ResultsExample() {
       <Header />
       <div className="mx-auto py-16 px-4 mt-16 max-w-7xl">
         <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold leading-tight" style={{ color: '#3F3F3F', marginBottom: '20px' }}>
+          <h2 className="text-4xl font-bold leading-tight text-gray-900 mb-4">
             {isRussian ? 'Результаты анализа' : 'Analysis Results'}
           </h2>
           
-          <p className="text-lg font-thin" style={{ color: '#747474' }}>
+          <p className="text-lg font-light text-gray-700">
             {isRussian ? 'Детальная обратная связь по вашей речи и языку тела' : 'Detailed feedback on your speech and body language'}
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 shadow-lg w-full">
+        <div className="bg-white rounded-3xl p-8 shadow-lg w-full">
           {data.audioResponse && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold text-gray-800">{isRussian ? 'Ваш результат:' : 'Your Result:'}</h3>
-              <div className="flex flex-col md:flex-row items-center justify-center gap-8" style={{marginTop:'40px'}}>
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold text-gray-800">{isRussian ? 'Ваш результат:' : 'Your Result:'}</h3>
+              <div className="flex flex-col md:flex-row items-center justify-center gap-8 mt-6">
                 <div className="w-full md:w-1/2 lg:w-1/3">
                   <OverallScore score={overallScore} language={isRussian ? 'ru' : 'en'} />
                 </div>
@@ -291,7 +287,7 @@ function ResultsExample() {
                   <LeaderboardSection score={overallScore} language={isRussian ? 'ru' : 'en'} />
                 </div>
               </div>
-              <pre className="bg-gray-100 p-6 rounded text-gray-800 pre-wrap w-full mt-8">{data.audioResponse.results.openai.text}</pre>
+              <pre className="bg-gray-100 p-6 rounded text-gray-800 whitespace-pre-wrap w-full mt-8">{data.audioResponse.results.openai.text}</pre>
 
               { data.gptResponse.links && (
                 <RecommendedVideo 
@@ -301,8 +297,8 @@ function ResultsExample() {
               )}
 
               {data.gptResponse && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{isRussian ? 'Анализ речи' : 'Speech Analysis'}</h3>
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-gray-800">{isRussian ? 'Анализ речи' : 'Speech Analysis'}</h3>
                   {renderGptAnalysis(data.gptResponse)}
                 </div>
               )}
@@ -310,8 +306,8 @@ function ResultsExample() {
           )}
 
           {data.videoResponse && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold text-gray-800">{isRussian ? 'Анализ языка тела:' : 'Body Language Analysis:'}</h3>
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold text-gray-800">{isRussian ? 'Анализ языка тела:' : 'Body Language Analysis:'}</h3>
               {renderBodyLanguageAnalysis(data.videoResponse.description)}
             </div>
           )}
