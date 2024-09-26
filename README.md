@@ -2,7 +2,7 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-Backend is on https://github.com/elderbug0/backend_speaksmartai 
+Backend is on https://github.com/elderbug0/SpeakSmartAI-Backend
 
 ## Available Scripts
 
